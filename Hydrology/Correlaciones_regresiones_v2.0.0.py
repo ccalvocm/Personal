@@ -21,21 +21,22 @@ def limpiar_kernel():
 limpiar_kernel()
 
 import pandas as pd
-import math
 import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import linear_model
 
 import fiscalyear
+
+#Variables globales
 fiscalyear.START_MONTH = 4
 
-#% funciones
+#funciones
 
 def agnohidrologico(year_,month_):
     cur_dt = fiscalyear.FiscalDate(year_, month_, 1) 
     retornar = cur_dt.fiscal_year - 1
     return retornar
-
 
 def regresion(x_,y_):
     X = sm.add_constant(x_)
@@ -44,6 +45,11 @@ def regresion(x_,y_):
     M = resultados_fit.params[1]
     R2 = resultados_fit.rsquared
     return [M,N,R2]
+
+def MLR(x__,y__): #"multivariable"
+    lm = linear_model.LinearRegression()
+    model = lm.fit(x__,y__)
+    return [lm.predict(x__), lm.score(x__,y__)]
     
 #%%    
     
@@ -53,7 +59,8 @@ def main():
 #    ruta_GitHub = r'D:\GitHub'
     ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
-    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
+#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
+    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
     Q_daily = pd.read_csv(ruta_Q, index_col = 0)
     Q_daily.index = pd.to_datetime(Q_daily.index)
     
@@ -61,11 +68,10 @@ def main():
 #    Q_daily.plot()
     
     #meses
-    
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('2005-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-11-12',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
@@ -149,4 +155,6 @@ def main():
     plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')
 #                r2 = coef_r2_mensuales.loc[mes][index]
           
+    #%% Multivariable
+    
     
