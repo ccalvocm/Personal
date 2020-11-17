@@ -181,7 +181,7 @@ def main():
     #%% Multivariable
     
     Q_daily_MLR = Q_daily_filtradas.copy()
-    n_multivariables = 26
+    n_multivariables = 5
 
 #    notNans = Q_daily_filtradas.notna()
 #    
@@ -201,29 +201,49 @@ def main():
             correl = correl.replace(1,-9999)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_filtradas.loc[Q_daily_filtradas['mes'] == mes][est_indep.to_list()]
-            noNans = x.count()
-            for est in noNans.index:
-                if noNans.loc[est] < 600:
-                    del x[est]
+            x = x.loc[y.notna()]
+            noNans = x.count().sort_values()
+            noNans.reset_index()
+            
+#            for est in noNans.index:
+#                if noNans.loc[est] < 200:
+#                    del x[est]
             x[col] = y
-            x = x.dropna()
+ 
 #            test = MLR(x.iloc[:,:-1],x.iloc[:,-1])
 #            test.score(x.iloc[:,:-1],x.iloc[:,-1])
-            r2 = 0.
-            while r2 < 0.7:
-                test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
-                r2 = test2.score(x.iloc[:,:-1],x.iloc[:,-1])
-                del x[est_indep[-1]]
-            
-            mask = y.isna()
-            X = Q_daily_filtradas[est_indep].loc[mask.index]
-            X = X.dropna()
-            if len(X) < 1:
-                print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
-#            test.predict(X)
+#            r2 = 0.
+#            while r2 < 0.7:
+            x_tentativo = x.dropna()
+            while len(x_tentativo) < 1:
+#                del x[x.columns[-2]]
+                if len(x.columns) == 2:
+                    break
+                else:
+                    estDelete = noNans.index[0]
+                    del x[estDelete]
+                    noNans = noNans.drop(estDelete)
+                    noNans.reset_index()
+                    x_tentativo = x.dropna()
+
+            if len(x.columns) == 2:
+                continue
             else:
-                Y_predictivo = test2.predict(X)
-                Q_daily_MLR.loc[X.index,col] = Y_predictivo
+            
+                x = x_tentativo
+                test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
+                test2.score(x.iloc[:,:-1],x.iloc[:,-1])
+    #            del x[x.columns[-2]]
+                
+                mask = y.isna()
+                X = Q_daily_filtradas[est_indep].loc[mask.index]
+                X = X.dropna()
+                if len(X) < 1:
+                    print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
+    #            test.predict(X)
+                else:
+                    Y_predictivo = test2.predict(X)
+                    Q_daily_MLR.loc[X.index,col] = Y_predictivo
             
 #            mask = x.notna()
 #            y.dropna()
