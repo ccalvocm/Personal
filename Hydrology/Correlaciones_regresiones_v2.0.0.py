@@ -25,6 +25,8 @@ import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import linear_model
+from sklearn.linear_model import Lasso
+
 
 import fiscalyear
 
@@ -46,10 +48,28 @@ def regresion(x_,y_):
     R2 = resultados_fit.rsquared
     return [M,N,R2]
 
+#def MLR(x__,y__,xq): #"multivariable"
+#    lm = linear_model.LinearRegression()
+#    model = lm.fit(x__,y__)
+#    return lm
+#    return [lm.predict(xq), lm.score(x__,y__)]
+    
 def MLR(x__,y__): #"multivariable"
     lm = linear_model.LinearRegression()
     model = lm.fit(x__,y__)
-    return [lm.predict(x__), lm.score(x__,y__)]
+    return lm
+
+def LASSO(x__,y__):
+#    alpha = 0.1
+    alpha = 0.0001
+    lin = Lasso(alpha=alpha,precompute=True,max_iter=1000,
+            positive=True, random_state=9999, selection='random')
+    lin.fit(x__,y__)
+    return lin
+
+def mejoresCorrelaciones(df, col, Nestaciones):
+    ordenados = df.sort_values(by=col, ascending = False)
+    return ordenados.index[:Nestaciones]
     
 #%%    
     
@@ -71,7 +91,7 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('2005-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-11-12',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
@@ -95,22 +115,25 @@ def main():
     
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
     
+    #%% Relleno con OLR
+    
     coef_m_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
     coef_n_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
     coef_r2_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
    
 
-    for j, row in Q_daily_filtradas.iterrows():
-        yr = j.year
-        mnth = j.month
-        hydro_yr = agnohidrologico(yr,mnth)
+#    for j, row in Q_daily_filtradas.iterrows():
+#        yr = j.year
+#        mnth = j.month
+#        hydro_yr = agnohidrologico(yr,mnth)
         # Q_daily.loc[j,'AGNO_HIDRO'] = hydro_yr
     
     # Est con mejor correlación diaria
     correl = Q_daily_filtradas.corr()
     correl = correl.replace(1,-9999)
     idx = correl.idxmax()
-    r = correl.max()
+#    idx_2 = correl[col].nlargest(3)
+#    r = correl.max()
     Q_daily_mon = Q_daily_filtradas.groupby(Q_daily_filtradas.index.month)
     
     for indice in idx.index:
@@ -127,8 +150,8 @@ def main():
             except:
                 print('No hay datos para el mes '+str(mes))
         
-        Q_daily_rellenas = Q_daily_filtradas.copy()
-        coeficientes = pd.DataFrame(index=Q_daily_rellenas.index, columns = ['m','n'])
+    Q_daily_rellenas = Q_daily_filtradas.copy()
+    coeficientes = pd.DataFrame(index=Q_daily_rellenas.index, columns = ['m','n'])
         
     nticks = 4
     plt.close("all")
@@ -157,4 +180,76 @@ def main():
           
     #%% Multivariable
     
+    Q_daily_MLR = Q_daily_filtradas.copy()
+    n_multivariables = 2
+
+#    notNans = Q_daily_filtradas.notna()
+#    
+#    Q_daily_agrupadas = Q_daily_filtradas.copy()
+#    Q_daily_agrupadas['yr'] = Q_daily_filtradas.index.year
+
+#    Q_daily_mon = Q_daily_filtradas.groupby(Q_daily_filtradas.index.month)
+    Q_daily_filtradas['mes'] = Q_daily_filtradas.index.month
+
+    for ind,col in enumerate(Q_daily_filtradas.columns):
+
+        for mes in meses:
+#            y = Q_daily_mon[col].apply(list).loc[mes] #mes 1
+            Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas['mes'] == mes]
+            y = Q_daily_mes[col]
+            correl = Q_daily_mes.corr()
+            correl = correl.replace(1,-9999)
+            est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
+            x = Q_daily_filtradas.loc[Q_daily_filtradas['mes'] == mes][est_indep.to_list()]
+            x[col] = y
+            x = x.dropna()
+#            test = MLR(x.iloc[:,:-1],x.iloc[:,-1])
+#            test.score(x.iloc[:,:-1],x.iloc[:,-1])
+            
+            test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
+            test2.score(x.iloc[:,:-1],x.iloc[:,-1])
+            
+            mask = y.isna()
+            X = Q_daily_filtradas[est_indep].loc[mask.index]
+            X = X.dropna()
+            
+#            test.predict(X)
+            Y_predictivo = test2.predict(X)
+            Q_daily_MLR.loc[X.index,col] = Y_predictivo
+            
+#            mask = x.notna()
+#            y.dropna()
+#            x = Q_daily_mon.agg(lambda x: x.tolist()).loc[mes].loc[est_indep]
+#            x =  Q_daily_mon.apply(lambda x: [list(est_indep)]).apply(pd.Series).loc[mes] 
+#            x =  Q_daily_mon[est_indep[:]].apply(list).loc[mes]  #mes 1
+#            del x[col]
     
+    del Q_daily_filtradas['mes']
+    nticks = 4
+    plt.close("all")
+    fig = plt.figure()
+    for ind,col in enumerate(Q_daily_filtradas.columns):
+        fig.add_subplot(6,4,ind+1)
+        ax1 = Q_daily_MLR[col].plot()
+        Q_daily_filtradas[col].plot(ax = ax1)
+        
+        ticks = ax1.xaxis.get_ticklocs()[::nticks]
+        fig.canvas.draw()
+        ticklabels = [l.get_text() for l in ax1.xaxis.get_ticklabels()][::nticks]
+        
+        ax1.xaxis.set_ticks(ticks)
+        ax1.xaxis.set_ticklabels(ticklabels)
+        ax1.figure.show()
+    plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')    
+      
+#        
+#        print(col)
+##        missingData = Q_daily_filtradas[col].isna()
+#        noMissingData = Q_daily_filtradas.loc[Q_daily_filtradas[col].notna()]
+#        del noMissingData[col]
+#        notNansN = noMissingData.count().sort_values(ascending=False)
+#        notNansN = notNansN[:4]
+
+#        Q_x =  Q_daily_filtradas[idx.loc[col]]
+#        Q_daily_rellenas.loc[missingData,col] = Q_x.loc[missingData]*coeficientes['m'].loc[missingData]+ coeficientes['n'].loc[missingData]
+#        Q_daily_rellenas.loc[:,col][Q_daily_rellenas.loc[:,col] < 0] = 0
