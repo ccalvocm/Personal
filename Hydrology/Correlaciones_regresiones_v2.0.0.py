@@ -92,7 +92,7 @@ def main():
     
     #fechas
     inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2020-11-12',format='%Y-%m-%d')
+    fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
@@ -181,7 +181,7 @@ def main():
     #%% Multivariable
     
     Q_daily_MLR = Q_daily_filtradas.copy()
-    n_multivariables = 2
+    n_multivariables = 26
 
 #    notNans = Q_daily_filtradas.notna()
 #    
@@ -201,21 +201,29 @@ def main():
             correl = correl.replace(1,-9999)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_filtradas.loc[Q_daily_filtradas['mes'] == mes][est_indep.to_list()]
+            noNans = x.count()
+            for est in noNans.index:
+                if noNans.loc[est] < 600:
+                    del x[est]
             x[col] = y
             x = x.dropna()
 #            test = MLR(x.iloc[:,:-1],x.iloc[:,-1])
 #            test.score(x.iloc[:,:-1],x.iloc[:,-1])
-            
-            test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
-            test2.score(x.iloc[:,:-1],x.iloc[:,-1])
+            r2 = 0.
+            while r2 < 0.7:
+                test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
+                r2 = test2.score(x.iloc[:,:-1],x.iloc[:,-1])
+                del x[est_indep[-1]]
             
             mask = y.isna()
             X = Q_daily_filtradas[est_indep].loc[mask.index]
             X = X.dropna()
-            
+            if len(X) < 1:
+                print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
 #            test.predict(X)
-            Y_predictivo = test2.predict(X)
-            Q_daily_MLR.loc[X.index,col] = Y_predictivo
+            else:
+                Y_predictivo = test2.predict(X)
+                Q_daily_MLR.loc[X.index,col] = Y_predictivo
             
 #            mask = x.notna()
 #            y.dropna()
