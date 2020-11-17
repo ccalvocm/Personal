@@ -24,6 +24,7 @@ import pandas as pd
 import math
 import statsmodels.api as sm
 import numpy as np
+import matplotlib.pyplot as plt
 
 import fiscalyear
 fiscalyear.START_MONTH = 4
@@ -35,17 +36,34 @@ def agnohidrologico(year_,month_):
     retornar = cur_dt.fiscal_year - 1
     return retornar
 
-#&%    
+
+def regresion(x_,y_):
+    X = sm.add_constant(x_)
+    resultados_fit = sm.OLS(y_,X,missing='drop').fit()
+    N = resultados_fit.params[0]
+    M = resultados_fit.params[1]
+    R2 = resultados_fit.rsquared
+    return [M,N,R2]
+    
+#%%    
+    
 def main():    
 
-    #%%
-    ruta_GitHub = r'D:\GitHub'
+#%%    
+#    ruta_GitHub = r'D:\GitHub'
+    ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+
     ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020.csv'
-    Q_daily = pd.read_csv(ruta_Q, index_col = 0)
+    Q_daily = pd.read_csv(ruta_Q, index_col = 0, sep =";")
     Q_daily.index = pd.to_datetime(Q_daily.index)
     
     # ver entrada gráfica
     Q_daily.plot()
+    
+    #meses
+    
+    meses = [4,5,6,7,8,9,10,11,12,1,2,3]
+
 
   #%%Crear indice de fechas
     
@@ -61,29 +79,88 @@ def main():
     data_anual = data_anual.sort_index()
     estaciones_minimas = pd.DataFrame(data_anual.sum(axis=1), columns = ['registro'])
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= 15]
+    
+    Q_daily_filtradas = Q_daily[estaciones_minimas.index]
+    
+    coef_m_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
+    coef_n_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
+    coef_r2_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
    
 
-    for j, row in Q_daily.iterrows():
+    for j, row in Q_daily_filtradas.iterrows():
         yr = j.year
         mnth = j.month
-        # year0 = AN_Q.loc[j,'AGNO_CALEND']
-        # month0 = AN_Q.loc[j,'MES_No'] 
         hydro_yr = agnohidrologico(yr,mnth)
         # Q_daily.loc[j,'AGNO_HIDRO'] = hydro_yr
     
-    correl = Q_daily.corr()
-    idx = correl.transform(max) == correl.index
+    # Est con mejor correlación diaria
+    correl = Q_daily_filtradas.corr()
+    correl = correl.replace(1,-9999)
+    idx = correl.idxmax()
+    r = correl.max()
+    Q_daily_mon = Q_daily_filtradas.groupby(Q_daily_filtradas.index.month)
+    
+    for indice in idx.index:
+        print(indice)
+        for mes in meses:
+            y = Q_daily_mon[indice].apply(list).loc[mes] #mes 1
+            est_indep = idx.loc[indice]
+            x =  Q_daily_mon[est_indep].apply(list).loc[mes]  #mes 1
+            try:
+                M, N, R2 = regresion(x,y)
+                coef_m_mensuales.loc[mes][indice] = M
+                coef_n_mensuales.loc[mes][indice] = N
+                coef_r2_mensuales.loc[mes][indice] = R2
+            except:
+                print('No hay datos para el mes '+str(mes))
+        
+        for index, row in Q_daily_filtradas.iterrows():
+            for col in Q_daily_filtradas.columns:
+                mes = index.month
+                m = coef_m_mensuales.loc[mes][col]
+                n = coef_n_mensuales.loc[mes][col]
+                Q_x =  Q_daily_filtradas.loc[index,idx.loc[col]]
+                Q_daily_filtradas.loc[index,col] = Q_x*m+n
+#                r2 = coef_r2_mensuales.loc[mes][index]
+
+                
+            
+            for col in AN_Q_sintetico.columns:
+                mes = row["MES_No"]
+                if col in cuencas_m:
+                    coef_m = coef_m_mensuales.loc[mes][col]
+                    coef_n = coef_n_mensuales.loc[mes][col]
+                    Q = Q_AN1.loc[index]*coef_m+coef_n
+                    Q = max(Q.values,0)
+                    AN_Q_sintetico = AN_Q_sintetico.copy()
+                    AN_Q_sintetico.at[index,col] = Q
+                elif col in cuencas_a:
+                    coef_m = coefs_m_anuales[col].values
+                    coef_n = coefs_n_anuales[col].values
+                    Q_anual_1 = Q_AN1.mean()
+                    Q_anual_2 = Q_anual_1*coef_m+coef_n
+                    razon = razones_template.loc[mes][col]
+                    razon = razon.copy()
+                    Q = Q_anual_2*razon
+                    Q = max(Q.values,0)
+                    AN_Q_sintetico = AN_Q_sintetico.copy()
+                    AN_Q_sintetico.at[index,col] = Q
+            
+        
+       
+        
+    # regresiones diarias por mes
+    model = sm.OLS(subcuenca_col, AN_Q1)
+    results = model.fit()
+    
+    n = results.params[0]
+    m = results.params[1]
     
     # La regresión se hará por mes        
-    # correl = Q_daily.groupby( Q_daily.index.month).corr()
-    correl = correl.replace(1,-9999)
     idx = correl.groupby('Fecha').transform(max) == correl.index
     max_r = correl.groupby('Fecha').max() 
     
-    AN_Q = AN_Q.set_index(pd.to_datetime(AN_Q['AGNO_CALEND'].astype(str)+'-'+AN_Q['MES_No'].astype(str).str.zfill(2),  format='%Y-%m'))
 
-
-meses = [4,5,6,7,8,9,10,11,12,1,2,3]
 
 coef_m_mensuales = pd.DataFrame( index = meses, columns = AN_Q.columns[3:])
 coef_n_mensuales = pd.DataFrame( index = meses, columns = AN_Q.columns[3:])
@@ -116,6 +193,8 @@ for i in range(12):
         coef_n_mensuales.loc[meses[i]][col] = results.params[0]
         coef_r2_mensuales.loc[meses[i]][col] = results.rsquared
 #        else:        
+        
+        
             
         AN_Q_anual = AN_Q.resample('YS').mean()
         
