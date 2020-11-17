@@ -26,8 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.linear_model import Lasso
-
-
+from sklearn.impute import SimpleImputer
 import fiscalyear
 
 #Variables globales
@@ -181,6 +180,17 @@ def main():
     #%% Multivariable
     
     Q_daily_MLR = Q_daily_filtradas.copy()
+    
+    from sklearn.experimental import enable_iterative_imputer
+    from sklearn.impute import IterativeImputer
+    imp = IterativeImputer(max_iter=10, random_state=0)
+    Q_daily_MLR = Q_daily_filtradas[Q_daily_filtradas[Q_daily_filtradas.count().idxmax()].notna()]
+    IterativeImputer(random_state=0)
+    imp.fit(Q_daily_MLR.values.T)
+    A = imp.transform(Q_daily_MLR.values.T).T
+    Q_daily_MLR = pd.DataFrame(A, columns =Q_daily_MLR.columns, index = Q_daily_MLR.index )
+    Q_daily_MLR= Q_daily_MLR.dropna()
+
     n_multivariables = 3
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
@@ -196,10 +206,13 @@ def main():
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes][est_indep.to_list()]
+                      
             x[col] = y
             noNans = x.iloc[:,:-1].count().sort_values()
             noNans = noNans.reset_index()
             x = x.loc[y.notna()]
+            
+            
             for i,est in enumerate(x.columns[:-1]):
                 x_aux = x.dropna()
                 if len(x_aux) < 1:
@@ -233,7 +246,13 @@ def main():
                  
             mask = y.loc[y.isna().index]
             X = Q_daily_filtradas[est_indep].loc[mask.index]
+            X = X[X[X.count().idxmax()].notna()]
+            imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+            imp.fit(X.values.T)
+            A = imp.transform(X.values.T).T
+            X = pd.DataFrame(A, columns =X.columns, index = X.index )
             X = X.dropna()
+
             if len(X) < 1:
                 print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
             else:
