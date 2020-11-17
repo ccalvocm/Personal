@@ -72,8 +72,9 @@ def main():
         # Q_daily.loc[j,'AGNO_HIDRO'] = hydro_yr
         
     correl = Q_daily.groupby( Q_daily.index.month).corr()
-    correl = correl[correl.groupby('Fecha').cumcount() == 1]
-    max_r = correl.groupby('Fecha').apply(lambda x:x.nlargest(2))
+    correl = correl.replace(1,-9999)
+    idx = correl.groupby('Fecha').transform(max) == correl.index
+    max_r = correl.groupby('Fecha').max() 
     
     AN_Q = AN_Q.set_index(pd.to_datetime(AN_Q['AGNO_CALEND'].astype(str)+'-'+AN_Q['MES_No'].astype(str).str.zfill(2),  format='%Y-%m'))
 
