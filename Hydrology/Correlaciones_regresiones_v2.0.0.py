@@ -72,9 +72,10 @@ def main():
         # Q_daily.loc[j,'AGNO_HIDRO'] = hydro_yr
     
     correl = Q_daily.corr()
-
-        
-    correl = Q_daily.groupby( Q_daily.index.month).corr()
+    idx = correl.transform(max) == correl.index
+    
+    # La regresión se hará por mes        
+    # correl = Q_daily.groupby( Q_daily.index.month).corr()
     correl = correl.replace(1,-9999)
     idx = correl.groupby('Fecha').transform(max) == correl.index
     max_r = correl.groupby('Fecha').max() 
