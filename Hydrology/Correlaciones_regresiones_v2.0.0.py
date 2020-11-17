@@ -70,6 +70,9 @@ def main():
         # month0 = AN_Q.loc[j,'MES_No'] 
         hydro_yr = agnohidrologico(yr,mnth)
         # Q_daily.loc[j,'AGNO_HIDRO'] = hydro_yr
+    
+    correl = Q_daily.corr()
+
         
     correl = Q_daily.groupby( Q_daily.index.month).corr()
     correl = correl.replace(1,-9999)
