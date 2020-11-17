@@ -181,29 +181,23 @@ def main():
     #%% Multivariable
     
     Q_daily_MLR = Q_daily_filtradas.copy()
-    n_multivariables = 10
+    n_multivariables = 3
 
-#    notNans = Q_daily_filtradas.notna()
-#    
-#    Q_daily_agrupadas = Q_daily_filtradas.copy()
-#    Q_daily_agrupadas['yr'] = Q_daily_filtradas.index.year
-
-#    Q_daily_mon = Q_daily_filtradas.groupby(Q_daily_filtradas.index.month)
-    # Q_daily_filtradas['mes'] = Q_daily_filtradas.index.month
-
+    yrs = Q_daily_filtradas.index.year.drop_duplicates()
+    
     for ind,col in enumerate(Q_daily_filtradas.columns):
-
+        
         for mes in meses:
-#            y = Q_daily_mon[col].apply(list).loc[mes] #mes 1
+            
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes]
+            
             y = Q_daily_mes[col]
             correl = Q_daily_mes.corr()
-            correl = correl.replace(1,-9999)
+            correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes][est_indep.to_list()]
             x[col] = y
-            # x = x.loc[y.notna()]
-            noNans = x.count().sort_values()
+            noNans = x.iloc[:,:-1].count().sort_values()
             noNans = noNans.reset_index()
             x = x.loc[y.notna()]
             for i,est in enumerate(x.columns[:-1]):
@@ -214,12 +208,6 @@ def main():
 
             x = x.dropna()
             est_indep = x.columns[:-1]
-#            for est in noNans.index:
-#                if noNans.loc[est] < 200:
-#                    del x[est]
- 
-#            test = MLR(x.iloc[:,:-1],x.iloc[:,-1])
-#            test.score(x.iloc[:,:-1],x.iloc[:,-1])
 #            r2 = 0.
 #            while r2 < 0.7:
 #             x_tentativo = x.dropna()
@@ -239,27 +227,21 @@ def main():
 #             else:
             
                 # x = x_tentativo
-            test2 = LASSO(x.iloc[:,:-1],x.iloc[:,-1])
-            test2.score(x.iloc[:,:-1],x.iloc[:,-1])
-    #            del x[x.columns[-2]]
-                
-            mask = y.isna()
+           
+            test2 = LASSO(x[est_indep],x[col])
+            test2.score(x[est_indep],x[col])
+                 
+            mask = y.loc[y.isna().index]
             X = Q_daily_filtradas[est_indep].loc[mask.index]
             X = X.dropna()
             if len(X) < 1:
                 print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
-#            test.predict(X)
             else:
                 Y_predictivo = test2.predict(X)
+                Y_predictivo[Y_predictivo < 0] = 0
                 Q_daily_MLR.loc[X.index,col] = Y_predictivo
             
-#            mask = x.notna()
-#            y.dropna()
-#            x = Q_daily_mon.agg(lambda x: x.tolist()).loc[mes].loc[est_indep]
-#            x =  Q_daily_mon.apply(lambda x: [list(est_indep)]).apply(pd.Series).loc[mes] 
-#            x =  Q_daily_mon[est_indep[:]].apply(list).loc[mes]  #mes 1
-#            del x[col]
-    
+#Graficar                
     nticks = 4
     plt.close("all")
     fig = plt.figure()
@@ -276,15 +258,4 @@ def main():
         ax1.xaxis.set_ticklabels(ticklabels)
         ax1.figure.show()
     plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-      
-#        
-#        print(col)
-##        missingData = Q_daily_filtradas[col].isna()
-#        noMissingData = Q_daily_filtradas.loc[Q_daily_filtradas[col].notna()]
-#        del noMissingData[col]
-#        notNansN = noMissingData.count().sort_values(ascending=False)
-#        notNansN = notNansN[:4]
 
-#        Q_x =  Q_daily_filtradas[idx.loc[col]]
-#        Q_daily_rellenas.loc[missingData,col] = Q_x.loc[missingData]*coeficientes['m'].loc[missingData]+ coeficientes['n'].loc[missingData]
-#        Q_daily_rellenas.loc[:,col][Q_daily_rellenas.loc[:,col] < 0] = 0
