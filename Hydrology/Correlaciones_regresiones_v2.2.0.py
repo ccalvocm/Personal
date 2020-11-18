@@ -94,7 +94,7 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('1990-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
@@ -204,7 +204,7 @@ def main():
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
             x[col] = y
             
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = 2*np.max(y), sample_posterior = True)
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = 3*np.max(y), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
             imp.fit(Q_daily_MLR_mes.values.T)
