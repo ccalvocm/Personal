@@ -31,7 +31,6 @@ import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from scipy import stats
-import gc
 
 
 #Variables globales
@@ -97,8 +96,8 @@ def main():
     #fechas
     inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
-    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
+    fin = pd.to_datetime('2019-01-01',format='%Y-%m-%d')
+    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
     minYr = 1
@@ -183,54 +182,49 @@ def main():
     plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')
 #                r2 = coef_r2_mensuales.loc[mes][index]
           
-    #%% Multivariable anual
+    #%% Multivariable
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 3
+    n_multivariables = 4
+    stdOutliers = 3
 
-    yrs = Q_daily_filtradas.index.year.drop_duplicates()
-    yrs = yrs[0::1]
-       
+    # yrs = Q_daily_filtradas.index.year.drop_duplicates()
+    
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
         print(col)
-        for i,yr in enumerate(yrs[:-1]):
+        for mes in meses:
             
-            # Q_daily_yr = Q_daily_filtradas.loc[Q_daily_filtradas.index.year == yr].copy()
-            Q_daily_yr = Q_daily_filtradas.loc[(Q_daily_filtradas.index.year <= yrs[i+1]) & (Q_daily_filtradas.index.year >= yrs[i])].copy()
-
+            Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
             
-            y = Q_daily_yr[col]
+            y = Q_daily_mes[col]
             if len(y[y.notna()]) < 1:
                 continue
-            correl = Q_daily_yr.corr()
+            correl = Q_daily_mes.corr()
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_yr[est_indep.to_list()]
+            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
             x[col] = y
             
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+3*y.std())
-            Q_daily_MLR_yr = x[x[x.count().idxmax()].notna()]
-#            Q_daily_MLR_yr = x
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
+            Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
-            imp.fit(Q_daily_MLR_yr.values.T)
-            A = imp.transform(Q_daily_MLR_yr.values.T.tolist()).T
-            Q_daily_MLR_yr = pd.DataFrame(A, columns = Q_daily_MLR_yr.columns, index = Q_daily_MLR_yr.index )
-            gc.collect()
-            del imp
-            del A
-            Q_daily_MLR_yr = Q_daily_MLR_yr.dropna()
-            Q_daily_MLR_yr[Q_daily_MLR_yr < 0] = 0
+            imp.fit(Q_daily_MLR_mes.values.T)
+            A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
+            Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
+            Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
+            Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
             
-            Y = pd.DataFrame(Q_daily_MLR_yr[col])
+            Y = pd.DataFrame(Q_daily_MLR_mes[col])
             
 #            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]
             
-            
+            del imp
+            del A
                       
             # x[col] = y
             # noNans = x.iloc[:,:-1].count().sort_values()
