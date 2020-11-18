@@ -189,13 +189,16 @@ def main():
     n_multivariables = 4
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
-    
+    yrs = yrs[0::4]
+       
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
         print(col)
-        for yr in yrs:
+        for i,yr in enumerate(yrs[:-1]):
             
-            Q_daily_yr = Q_daily_filtradas.loc[Q_daily_filtradas.index.year == yr].copy()
+            # Q_daily_yr = Q_daily_filtradas.loc[Q_daily_filtradas.index.year == yr].copy()
+            Q_daily_yr = Q_daily_filtradas.loc[(Q_daily_filtradas.index.year <= yrs[i+1]) & (Q_daily_filtradas.index.year >= yrs[i])].copy()
+
             
             y = Q_daily_yr[col]
             correl = Q_daily_yr.corr()
