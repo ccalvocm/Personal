@@ -186,7 +186,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 2
+    n_multivariables = 3
     stdOutliers = 4
 
     # yrs = Q_daily_filtradas.index.year.drop_duplicates()
@@ -205,9 +205,11 @@ def main():
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
+#            x = x.fillna(x.rolling(30).mean())
             x[col] = y
             
             imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
+#            Q_daily_MLR_mes = x.fillna(x.median())
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
             imp.fit(Q_daily_MLR_mes.values.T)
