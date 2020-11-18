@@ -186,8 +186,8 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 3
-    stdOutliers = 4
+    n_multivariables = 10
+    stdOutliers = 3
 
     # yrs = Q_daily_filtradas.index.year.drop_duplicates()
     
@@ -198,7 +198,7 @@ def main():
             
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
             
-            y = Q_daily_mes[col]
+            y = Q_daily_mes[col].copy()
             if len(y[y.notna()]) < 1:
                 continue
             correl = Q_daily_mes.corr()
@@ -216,17 +216,20 @@ def main():
             A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
             Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
-            Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
-            
+#            Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
             Y = pd.DataFrame(Q_daily_MLR_mes[col])
             
 #            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+
             
-            del imp
-            del A
+#            Q_daily_MLR.loc[y.index,col] = y
+            
+#            del imp
+#            del A
                       
             # x[col] = y
             # noNans = x.iloc[:,:-1].count().sort_values()
@@ -285,14 +288,14 @@ def main():
             #     Y_predictivo[Y_predictivo < 0] = 0
             #     Q_daily_MLR.loc[X.index,col] = Y_predictivo
             
-#Graficar                
-    nticks = 4
+#Graficar
+    nticks = 2
     plt.close("all")
     fig = plt.figure()
     for ind,col in enumerate(Q_daily_filtradas.columns):
         fig.add_subplot(8,4,ind+1)
-        ax1 = Q_daily_MLR[col].plot()
-        Q_daily_filtradas[col].plot(ax = ax1)
+        ax1 = Q_daily_MLR[col].plot(linewidth = 3)
+        Q_daily_filtradas[col].plot(ax = ax1, linewidth = 1)
         
         ticks = ax1.xaxis.get_ticklocs()[::nticks]
         fig.canvas.draw()
@@ -301,5 +304,5 @@ def main():
         ax1.xaxis.set_ticks(ticks)
         ax1.xaxis.set_ticklabels(ticklabels)
         ax1.figure.show()
-    plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')    
+    plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
 
