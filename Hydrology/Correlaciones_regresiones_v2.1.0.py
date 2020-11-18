@@ -193,12 +193,12 @@ def main():
         
         from sklearn.experimental import enable_iterative_imputer
         from sklearn.impute import IterativeImputer
-        imp = IterativeImputer(max_iter=1, random_state=0)
+        imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, sample_posterior = True)
         Q_daily_MLR_mes = Q_daily_mes[Q_daily_mes[Q_daily_mes.count().idxmax()].notna()]
         IterativeImputer(random_state=0)
         imp.fit(Q_daily_MLR_mes.values.T)
         A = imp.transform(Q_daily_MLR_mes.values.T).T
-        Q_daily_MLR_mes = pd.DataFrame(A, columns =Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
+        Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
         Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
         Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
              
