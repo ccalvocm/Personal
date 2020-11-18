@@ -181,85 +181,43 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    from sklearn.experimental import enable_iterative_imputer
-    from sklearn.impute import IterativeImputer
-    imp = IterativeImputer(max_iter=1, random_state=0)
-    Q_daily_MLR = Q_daily_filtradas[Q_daily_filtradas[Q_daily_filtradas.count().idxmax()].notna()]
-    IterativeImputer(random_state=0)
-    imp.fit(Q_daily_MLR.values.T)
-    A = imp.transform(Q_daily_MLR.values.T).T
-    Q_daily_MLR = pd.DataFrame(A, columns =Q_daily_MLR.columns, index = Q_daily_MLR.index )
-    Q_daily_MLR= Q_daily_MLR.dropna()
-
     n_multivariables = 3
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
     
-    for ind,col in enumerate(Q_daily_filtradas.columns):
+    # for ind,col in enumerate(Q_daily_filtradas.columns):
         
-        for mes in meses:
-            
-            Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes]
-            
-            y = Q_daily_mes[col]
-            correl = Q_daily_mes.corr()
-            correl = correl.replace(1,-1e10)
-            est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes][est_indep.to_list()]
-                      
-            x[col] = y
-            noNans = x.iloc[:,:-1].count().sort_values()
-            noNans = noNans.reset_index()
-            x = x.loc[y.notna()]
-            
-            
-            for i,est in enumerate(x.columns[:-1]):
-                x_aux = x.dropna()
-                if len(x_aux) < 1:
-                    del x[noNans.loc[i,'index']]
-                    noNans = noNans.drop(i)
+    for mes in meses:
+        
+        Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes]
+        
+        from sklearn.experimental import enable_iterative_imputer
+        from sklearn.impute import IterativeImputer
+        imp = IterativeImputer(max_iter=1, random_state=0)
+        Q_daily_MLR_mes = Q_daily_mes[Q_daily_mes[Q_daily_mes.count().idxmax()].notna()]
+        IterativeImputer(random_state=0)
+        imp.fit(Q_daily_MLR_mes.values.T)
+        A = imp.transform(Q_daily_MLR_mes.values.T).T
+        Q_daily_MLR_mes = pd.DataFrame(A, columns =Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
+        Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
+        Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
+             
+        # mask = y.loc[y.isna().index]
+        # X = Q_daily_filtradas[est_indep].loc[mask.index]
+        # X = X[X[X.count().idxmax()].notna()]
+        # imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+        # imp.fit(X.values.T)
+        # SimpleImputer()
+        # A = imp.transform(X.values.T).T
+        # X = pd.DataFrame(A, columns =X.columns, index = X.index )
+        # X = X.dropna()
 
-            x = x.dropna()
-            est_indep = x.columns[:-1]
-#            r2 = 0.
-#            while r2 < 0.7:
-#             x_tentativo = x.dropna()
-#             while len(x_tentativo) < 1:
-# #                del x[x.columns[-2]]
-#                 if len(x.columns) == 2:
-#                     break
-#                 else:
-#                     estDelete = noNans.index[0]
-#                     del x[estDelete]
-#                     noNans = noNans.drop(estDelete)
-#                     noNans.reset_index()
-#                     x_tentativo = x.dropna()
-
-#             if len(x.columns) == 2:
-#                 continue
-#             else:
-            
-                # x = x_tentativo
-           
-            test2 = LASSO(x[est_indep],x[col])
-            test2.score(x[est_indep],x[col])
-                 
-            mask = y.loc[y.isna().index]
-            X = Q_daily_filtradas[est_indep].loc[mask.index]
-            # X = X[X[X.count().idxmax()].notna()]
-            # imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-            # imp.fit(X.values.T)
-            # SimpleImputer()
-            # A = imp.transform(X.values.T).T
-            # X = pd.DataFrame(A, columns =X.columns, index = X.index )
-            X = X.dropna()
-
-            if len(X) < 1:
-                print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
-            else:
-                Y_predictivo = test2.predict(X)
-                Y_predictivo[Y_predictivo < 0] = 0
-                Q_daily_MLR.loc[X.index,col] = Y_predictivo
+        # if len(X) < 1:
+        #     print('No existe información para rellenar el mes '+str(mes)+' en la estación '+col)
+        # else:
+        # Y_predictivo = test2.predict(X)
+        # Y_predictivo[Y_predictivo < 0] = 0
+        Q_daily_MLR.loc[Q_daily_MLR_mes.index] = Q_daily_MLR_mes
             
 #Graficar                
     nticks = 4
