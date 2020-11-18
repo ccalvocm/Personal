@@ -31,6 +31,7 @@ import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from scipy import stats
+import gc
 
 
 #Variables globales
@@ -189,7 +190,7 @@ def main():
     n_multivariables = 3
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
-    yrs = yrs[0::3]
+    yrs = yrs[0::2]
        
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
@@ -215,6 +216,8 @@ def main():
             imp.fit(Q_daily_MLR_yr.values.T)
             A = imp.transform(Q_daily_MLR_yr.values.T.tolist()).T
             Q_daily_MLR_yr = pd.DataFrame(A, columns = Q_daily_MLR_yr.columns, index = Q_daily_MLR_yr.index )
+            gc.collect()
+            del imp
             Q_daily_MLR_yr = Q_daily_MLR_yr.dropna()
             Q_daily_MLR_yr[Q_daily_MLR_yr < 0] = 0
             
@@ -225,10 +228,7 @@ def main():
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]
             
-            import gc
-            gc.collect()
             
-            del imp
                       
             # x[col] = y
             # noNans = x.iloc[:,:-1].count().sort_values()
