@@ -21,7 +21,7 @@ def limpiar_kernel():
 limpiar_kernel()
 
 import pandas as pd
-#import statsmodels.api as sm
+import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import linear_model
@@ -79,8 +79,8 @@ def mejoresCorrelaciones(df, col, Nestaciones):
 def main():    
 
 #%%    
-#    ruta_GitHub = r'D:\GitHub'
-    ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+    ruta_GitHub = r'D:\GitHub'
+    # ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
     ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
@@ -94,7 +94,7 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('1979-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2019-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
@@ -186,7 +186,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 10
+    n_multivariables = 15
     stdOutliers = 3
 
     # yrs = Q_daily_filtradas.index.year.drop_duplicates()
@@ -199,8 +199,8 @@ def main():
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
             
             y = Q_daily_mes[col].copy()
-            if len(y[y.notna()]) < 1:
-                continue
+            # if len(y[y.notna()]) < 1:
+            #     continue
             correl = Q_daily_mes.corr()
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
