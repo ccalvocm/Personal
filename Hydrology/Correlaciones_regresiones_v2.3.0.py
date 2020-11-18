@@ -21,7 +21,7 @@ def limpiar_kernel():
 limpiar_kernel()
 
 import pandas as pd
-import statsmodels.api as sm
+#import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import linear_model
@@ -80,8 +80,8 @@ def mejoresCorrelaciones(df, col, Nestaciones):
 def main():    
 
 #%%    
-    ruta_GitHub = r'D:\GitHub'
-    # ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+#    ruta_GitHub = r'D:\GitHub'
+    ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
     ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
@@ -95,7 +95,7 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('1985-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
@@ -190,7 +190,7 @@ def main():
     n_multivariables = 3
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
-    yrs = yrs[0::2]
+    yrs = yrs[0::1]
        
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
@@ -210,20 +210,22 @@ def main():
             x = Q_daily_yr[est_indep.to_list()]
             x[col] = y
             
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, sample_posterior = True)
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0)
             Q_daily_MLR_yr = x[x[x.count().idxmax()].notna()]
+#            Q_daily_MLR_yr = x
             IterativeImputer(random_state=0)
             imp.fit(Q_daily_MLR_yr.values.T)
             A = imp.transform(Q_daily_MLR_yr.values.T.tolist()).T
             Q_daily_MLR_yr = pd.DataFrame(A, columns = Q_daily_MLR_yr.columns, index = Q_daily_MLR_yr.index )
             gc.collect()
             del imp
+            del A
             Q_daily_MLR_yr = Q_daily_MLR_yr.dropna()
             Q_daily_MLR_yr[Q_daily_MLR_yr < 0] = 0
             
             Y = pd.DataFrame(Q_daily_MLR_yr[col])
             
-            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
+#            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]

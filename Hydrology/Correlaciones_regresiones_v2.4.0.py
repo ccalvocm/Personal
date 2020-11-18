@@ -94,9 +94,9 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('1992-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
+    fin = pd.to_datetime('2019-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
@@ -187,6 +187,7 @@ def main():
     Q_daily_MLR = Q_daily_filtradas.copy()
     
     n_multivariables = 4
+    stdOutliers = 3
 
     # yrs = Q_daily_filtradas.index.year.drop_duplicates()
     
@@ -206,7 +207,7 @@ def main():
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
             x[col] = y
             
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+3*y.std(), sample_posterior = True)
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
             imp.fit(Q_daily_MLR_mes.values.T)
@@ -217,7 +218,7 @@ def main():
             
             Y = pd.DataFrame(Q_daily_MLR_mes[col])
             
-            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
+#            Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]
