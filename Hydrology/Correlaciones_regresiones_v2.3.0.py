@@ -186,10 +186,10 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 4
+    n_multivariables = 3
 
     yrs = Q_daily_filtradas.index.year.drop_duplicates()
-    yrs = yrs[0::4]
+    yrs = yrs[0::3]
        
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
@@ -201,6 +201,8 @@ def main():
 
             
             y = Q_daily_yr[col]
+            if len(y[y.notna()]) < 1:
+                continue
             correl = Q_daily_yr.corr()
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
@@ -222,6 +224,11 @@ def main():
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
             
             Q_daily_MLR.loc[Y.index,col] = Y[col]
+            
+            import gc
+            gc.collect()
+            
+            del imp
                       
             # x[col] = y
             # noNans = x.iloc[:,:-1].count().sort_values()
