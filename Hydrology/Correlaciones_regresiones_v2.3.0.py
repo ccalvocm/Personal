@@ -94,7 +94,7 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('1992-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('1985-12-31',format='%Y-%m-%d')
     # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
@@ -182,38 +182,38 @@ def main():
     plt.legend(['Rellenas','Originales'],bbox_to_anchor=(1.05, 1), loc='upper left')
 #                r2 = coef_r2_mensuales.loc[mes][index]
           
-    #%% Multivariable
+    #%% Multivariable anual
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
     n_multivariables = 4
 
-    # yrs = Q_daily_filtradas.index.year.drop_duplicates()
+    yrs = Q_daily_filtradas.index.year.drop_duplicates()
     
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
         print(col)
-        for mes in meses:
+        for yr in yrs:
             
-            Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
+            Q_daily_yr = Q_daily_filtradas.loc[Q_daily_filtradas.index.year == yr].copy()
             
-            y = Q_daily_mes[col]
-            correl = Q_daily_mes.corr()
+            y = Q_daily_yr[col]
+            correl = Q_daily_yr.corr()
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
+            x = Q_daily_yr[est_indep.to_list()]
             x[col] = y
             
             imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, sample_posterior = True)
-            Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
+            Q_daily_MLR_yr = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
-            imp.fit(Q_daily_MLR_mes.values.T)
-            A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
-            Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
-            Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
-            Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
+            imp.fit(Q_daily_MLR_yr.values.T)
+            A = imp.transform(Q_daily_MLR_yr.values.T.tolist()).T
+            Q_daily_MLR_yr = pd.DataFrame(A, columns = Q_daily_MLR_yr.columns, index = Q_daily_MLR_yr.index )
+            Q_daily_MLR_yr = Q_daily_MLR_yr.dropna()
+            Q_daily_MLR_yr[Q_daily_MLR_yr < 0] = 0
             
-            Y = pd.DataFrame(Q_daily_MLR_mes[col])
+            Y = pd.DataFrame(Q_daily_MLR_yr[col])
             
             Y = Y[~(np.abs(Y-y.mean())>(3*y.std()))]
             # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
