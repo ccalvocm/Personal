@@ -30,6 +30,8 @@ from sklearn.impute import SimpleImputer
 import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from scipy import stats
+
 
 #Variables globales
 fiscalyear.START_MONTH = 4
@@ -92,7 +94,8 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-    inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
+    # inicio = pd.to_datetime('1978-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= pd.to_datetime('2013-01-01',format='%Y-%m-%d') ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
@@ -187,20 +190,21 @@ def main():
 
     # yrs = Q_daily_filtradas.index.year.drop_duplicates()
     
-    for ind,col in enumerate(Q_daily_filtradas.columns):
+    for ind,col in enumerate(Q_daily_MLR.columns):
         
+        print(col)
         for mes in meses:
             
-            Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes]
+            Q_daily_mes = Q_daily_MLR.loc[Q_daily_MLR.index.month == mes]
             
             y = Q_daily_mes[col]
             correl = Q_daily_mes.corr()
             correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes][est_indep.to_list()]
+            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
+            x[col] = y
             
-            
-            imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, sample_posterior = True)
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = 2*np.max(y), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             IterativeImputer(random_state=0)
             imp.fit(Q_daily_MLR_mes.values.T)
@@ -208,6 +212,13 @@ def main():
             Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
             Q_daily_MLR_mes[Q_daily_MLR_mes < 0] = 0
+            
+            Y = pd.DataFrame(Q_daily_MLR_mes[col])
+            
+            # Y = Y[~(np.abs(Y[col]-Y[col].mean())>(2*Y[col].std()))]
+            # Y[(np.abs(stats.zscore(Y)) < 3).all(axis=1)]
+            
+            Q_daily_MLR.loc[Y.index,col] = Y[col]
                       
             # x[col] = y
             # noNans = x.iloc[:,:-1].count().sort_values()
