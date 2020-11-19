@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+^^# -*- coding: utf-8 -*-
 """
 Spyder Editor
 
@@ -304,5 +304,6 @@ def main():
         ax1.xaxis.set_ticks(ticks)
         ax1.xaxis.set_ticklabels(ticklabels)
         ax1.figure.show()
+        plt.ylabel('Q $m$')
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
 
