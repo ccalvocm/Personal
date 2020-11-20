@@ -31,6 +31,7 @@ import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from scipy import stats
+import gc
 
 
 #Variables globales
@@ -90,9 +91,10 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #fechas
-#    inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
+    # inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2001-01-01',format='%Y-%m-%d')
+    # fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
@@ -191,9 +193,9 @@ def main():
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
             x[col] = y
             
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
+            imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
-            IterativeImputer(random_state=0)
+            # IterativeImputer()
             imp.fit(Q_daily_MLR_mes.values.T)
             A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
             Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
@@ -205,6 +207,9 @@ def main():
 #            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
             Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(7).mean())
 
+            gc.collect()
+            del imp
+            del A
 #Graficar
     nticks = 2
     plt.close("all")

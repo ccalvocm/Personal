@@ -31,7 +31,7 @@ import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from scipy import stats
-
+import gc
 
 #Variables globales
 fiscalyear.START_MONTH = 4
