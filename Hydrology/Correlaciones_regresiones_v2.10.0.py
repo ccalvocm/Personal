@@ -47,8 +47,8 @@ def mejoresCorrelaciones(df, col, Nestaciones):
 def main():    
 
 #%%    
-    ruta_GitHub = r'D:\GitHub'
-    # ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+#    ruta_GitHub = r'D:\GitHub'
+    ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
     # ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
@@ -63,15 +63,19 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
+    #subconjunto de años
+    n = 1
     #fechas
-    # inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2002-01-01',format='%Y-%m-%d')
-    # fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
-    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
+    fin = pd.to_datetime('2012-01-01',format='%Y-%m-%d')
+    
+    dias = fin-inicio
+    fin_0 = inicio +  dias/n
+    
+    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin_0, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 2
+    minYr = 1
 
   #%%Crear indice de fechas
     
@@ -80,7 +84,7 @@ def main():
     data = Q_daily.notnull().astype('int')
     data = data.groupby(Q_daily.index.year)  
     data_anual = data.aggregate(np.sum)
-    data_anual = data_anual/(365*0.8)  
+    data_anual = data_anual/(365*0.85)  
     data_anual = data_anual.apply(lambda x: [y if y < 1 else 1 for y in x])
     data_anual = data_anual.transpose()
    
@@ -154,7 +158,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 10
+    n_multivariables = 20
     stdOutliers = 3
     
     learnt_month = {x : '' for x in meses}
