@@ -162,16 +162,19 @@ def main():
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
         print(col)
+        
         for mes in meses:
              
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
             
             y = Q_daily_mes[col].copy()
+            
+            if y.count() < 1:
+            
+                continue
             correl = Q_daily_mes.corr()
-            correl = correl.replace(1,-1e10)
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
-            x[col] = y
             
             imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
@@ -182,12 +185,12 @@ def main():
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
             # Y = pd.DataFrame(Q_daily_MLR_mes[col])
             
-            
-            Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
+            Q_daily_MLR.loc[Q_daily_MLR_mes.index,col] = Q_daily_MLR_mes[col]
+            # Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
 #            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
             Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(7).mean())
             
-            learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
+            # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
             gc.collect()
             del imp
