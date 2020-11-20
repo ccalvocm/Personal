@@ -71,7 +71,7 @@ def main():
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 2
+    minYr = 1
 
   #%%Crear indice de fechas
     
@@ -154,8 +154,8 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 10
-    stdOutliers = 3
+    n_multivariables = 30
+    stdOutliers = 2
     
     learnt_month = {x : '' for x in meses}
     
@@ -190,7 +190,7 @@ def main():
                 
                 Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
     #            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
-                Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(30).mean())
+                Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(7).mean())
                 
                 learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
     
