@@ -24,25 +24,11 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import linear_model
-from sklearn.linear_model import Lasso
-from sklearn.impute import SimpleImputer
-import fiscalyear
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-from scipy import stats
 import gc
 
-
-#Variables globales
-fiscalyear.START_MONTH = 4
-
 #funciones
-
-def agnohidrologico(year_,month_):
-    cur_dt = fiscalyear.FiscalDate(year_, month_, 1) 
-    retornar = cur_dt.fiscal_year - 1
-    return retornar
 
 def regresion(x_,y_):
     X = sm.add_constant(x_)
@@ -52,19 +38,6 @@ def regresion(x_,y_):
     R2 = resultados_fit.rsquared
     return [M,N,R2]
     
-def MLR(x__,y__): #"multivariable"
-    lm = linear_model.LinearRegression()
-    model = lm.fit(x__,y__)
-    return lm
-
-def LASSO(x__,y__): #"multivariable"
-#    alpha = 0.1
-    alpha = 0.0001
-    lin = Lasso(alpha=alpha,precompute=True,max_iter=1000,
-            positive=True, random_state=9999, selection='random')
-    lin.fit(x__,y__)
-    return lin
-
 def mejoresCorrelaciones(df, col, Nestaciones):
     ordenados = df.sort_values(by=col, ascending = False)
     return ordenados.index[:Nestaciones]
@@ -98,7 +71,7 @@ def main():
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 1
+    minYr = 2
 
   #%%Crear indice de fechas
     
@@ -115,12 +88,12 @@ def main():
     estaciones_minimas = pd.DataFrame(data_anual.sum(axis=1), columns = ['registro'])
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= minYr]
     
-    estaciones_minimas = ['05710001-K', '05701001-0', '05701002-9', '05702001-6', '05704002-5', '05705001-2', '05706001-8', '05707002-1', '05721001-K',
-                         '05722001-5',  '05722002-3', '05716001-2', '05735001-6', '05737002-5','05741001-9', '05746001-6',  '05748001-7']
+    # estaciones_minimas = ['05710001-K', '05701001-0', '05701002-9', '05702001-6', '05704002-5', '05705001-2', '05706001-8', '05707002-1', '05721001-K',
+                         # '05722001-5',  '05722002-3', '05716001-2', '05735001-6', '05737002-5','05741001-9', '05746001-6',  '05748001-7']
                    
-    Q_daily_filtradas = Q_daily[estaciones_minimas]
+    # Q_daily_filtradas = Q_daily[estaciones_minimas]
 
-    # Q_daily_filtradas = Q_daily[estaciones_minimas.index]
+    Q_daily_filtradas = Q_daily[estaciones_minimas.index]
     
     #%% Relleno con OLR
     
@@ -181,7 +154,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 9
+    n_multivariables = 5
     stdOutliers = 3
     
     learnt_month = {x : '' for x in meses}
