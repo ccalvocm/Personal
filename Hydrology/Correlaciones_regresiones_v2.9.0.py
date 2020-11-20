@@ -66,7 +66,7 @@ def main():
     #fechas
     # inicio = pd.to_datetime('2000-12-31',format='%Y-%m-%d')
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2001-01-01',format='%Y-%m-%d')
+    fin = pd.to_datetime('2002-01-01',format='%Y-%m-%d')
     # fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
@@ -154,7 +154,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 5
+    n_multivariables = 10
     stdOutliers = 3
     
     learnt_month = {x : '' for x in meses}
@@ -216,4 +216,5 @@ def main():
         plt.ylabel('Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001')
 
