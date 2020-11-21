@@ -104,11 +104,8 @@ def main():
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime('2002-01-01',format='%Y-%m-%d')
     
-    dias = fin-inicio
-    fin_0 = inicio +  dias/n
-    
-    Q_daily_chunk1 = pd.DataFrame(Q_daily_filtradas[Q_daily_filtradas.index <= fin_0 ],  index = pd.date_range(inicio, fin_0, freq='D', closed='right'))
-
+    t = np.linspace(inicio.value, fin.value, n )
+    t = pd.to_datetime(t)    
     
     #%% Relleno con OLR
     
@@ -167,18 +164,24 @@ def main():
           
     #%% Multivariable
     
-    Q_daily_MLR = Q_daily_chunk1.copy()
+    Q_daily_MLR = Q_daily_filtradas.copy()
     
     n_multivariables = 30
     stdOutliers = 3
+    
+    for j,ventana in enumerate(t[:-1]):
+        print(j)
         
-    for ind,col in enumerate(Q_daily_chunk1.columns):
+    Q_daily_MLR_aux = pd.DataFrame(Q_daily_filtradas.loc[(Q_daily_filtradas.index >= ventana) & (Q_daily_filtradas.index <= t[j+1]) ],  index = pd.date_range(ventana, t[j+1], freq='D', closed='right'))
+
+        
+    for ind,col in enumerate(Q_daily_MLR_aux.columns):
         
         print(col)
         
         for mes in meses:
              
-            Q_daily_mes = Q_daily_chunk1.loc[Q_daily_chunk1.index.month == mes].copy()
+            Q_daily_mes = Q_daily_MLR_aux.loc[Q_daily_MLR_aux.index.month == mes].copy()
             
             y = Q_daily_mes[col].copy()
                         
@@ -186,7 +189,7 @@ def main():
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
             
-            imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = Q_month_mean.loc[mes,col]+stdOutliers*Q_month_std.loc[mes,col], sample_posterior = True)
+            imp = IterativeImputer(max_iter=4, random_state=0, min_value = 0, max_value = Q_month_mean.loc[mes,col]+stdOutliers*Q_month_std.loc[mes,col], sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             # IterativeImputer()
             imp.fit(Q_daily_MLR_mes.values.T)
@@ -225,5 +228,5 @@ def main():
         plt.ylabel('Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_correction_ventanas.csv')
 
