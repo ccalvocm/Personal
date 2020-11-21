@@ -167,49 +167,50 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 30
+    n_multivariables = 33
     stdOutliers = 3
     
     for j,ventana in enumerate(t[:-1]):
         print(j)
         
-    Q_daily_MLR_aux = pd.DataFrame(Q_daily_filtradas.loc[(Q_daily_filtradas.index >= ventana) & (Q_daily_filtradas.index <= t[j+1]) ],  index = pd.date_range(ventana, t[j+1], freq='D', closed='right'))
+        Q_daily_MLR_aux = pd.DataFrame(Q_daily_filtradas.loc[(Q_daily_filtradas.index >= ventana) & (Q_daily_filtradas.index <= t[j+1]) ],  index = pd.date_range(ventana, t[j+1], freq='D', closed='right'))
 
         
-    for ind,col in enumerate(Q_daily_MLR_aux.columns):
-        
-        print(col)
-        
-        for mes in meses:
-             
-            Q_daily_mes = Q_daily_MLR_aux.loc[Q_daily_MLR_aux.index.month == mes].copy()
+        for ind,col in enumerate(Q_daily_MLR_aux.columns):
             
-            y = Q_daily_mes[col].copy()
+            print(col)
+            
+            for mes in meses:
+                 
+                Q_daily_mes = Q_daily_MLR_aux.loc[Q_daily_MLR_aux.index.month == mes].copy()
                         
-            correl = Q_daily_mes.corr()
-            est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
-            
-            imp = IterativeImputer(max_iter=4, random_state=0, min_value = 0, max_value = Q_month_mean.loc[mes,col]+stdOutliers*Q_month_std.loc[mes,col], sample_posterior = True)
-            Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
-            # IterativeImputer()
-            imp.fit(Q_daily_MLR_mes.values.T)
-            A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
-            Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
-            Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
-            # Y = pd.DataFrame(Q_daily_MLR_mes[col])
-            
-            Q_daily_MLR.loc[Q_daily_MLR_mes.index,col] = Q_daily_MLR_mes[col]
-            # Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
-#            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
-            # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
-
-            # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
-
-            gc.collect()
-            del imp
-            del A
+                for column in Q_daily_mes.columns:
+                    Q_daily_mes.loc[Q_daily_mes[col].isna().index,column] = Q_month_mean.loc[mes,column]
+                                           
+                correl = Q_daily_mes.corr()
+                est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
+                x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
+                
+                imp = IterativeImputer(max_iter=4, random_state=0, min_value = 0, max_value = Q_month_mean.loc[mes,col]+stdOutliers*Q_month_std.loc[mes,col], sample_posterior = True)
+                Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
+                # IterativeImputer()
+                imp.fit(Q_daily_MLR_mes.values.T)
+                A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
+                Q_daily_MLR_mes = pd.DataFrame(A, columns = Q_daily_MLR_mes.columns, index = Q_daily_MLR_mes.index )
+                Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
+                # Y = pd.DataFrame(Q_daily_MLR_mes[col])
+                
+                Q_daily_MLR.loc[Q_daily_MLR_mes.index,col] = Q_daily_MLR_mes[col]
+                # Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
+    #            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+                # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
+                # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+    
+                # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
+    
+                gc.collect()
+                del imp
+                del A
 #Graficar
     nticks = 2
     plt.close("all")
