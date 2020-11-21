@@ -96,8 +96,9 @@ def main():
   
     Q_month_mean = Q_daily_filtradas.groupby(Q_daily.index.month).mean()    
     Q_month_std = Q_daily_filtradas.groupby(Q_daily.index.month).std()    
-    other = (Q_month_mean.fillna(method='ffill') + Q_month_mean.fillna(method='bfill'))/2
-    
+    Q_month_mean = (Q_month_mean.fillna(method='ffill') + Q_month_mean.fillna(method='bfill'))/2
+    Q_month_std = (Q_month_std.fillna(method='ffill') + Q_month_std.fillna(method='bfill'))/2
+
      #subconjunto de años
     n = 3
     #fechas
