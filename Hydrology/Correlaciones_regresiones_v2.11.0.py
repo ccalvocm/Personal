@@ -156,9 +156,7 @@ def main():
     
     n_multivariables = 30
     stdOutliers = 2
-    
-    learnt_month = {x : '' for x in meses}
-    
+        
     for ind,col in enumerate(Q_daily_filtradas.columns):
         
         print(col)
@@ -188,8 +186,9 @@ def main():
             Q_daily_MLR.loc[Q_daily_MLR_mes.index,col] = Q_daily_MLR_mes[col]
             # Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
 #            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(7).mean())
-            
+            # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+
             # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
             gc.collect()
@@ -214,5 +213,5 @@ def main():
         plt.ylabel('Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv')
 
