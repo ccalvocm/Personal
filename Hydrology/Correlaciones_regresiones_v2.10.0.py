@@ -64,18 +64,18 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     #subconjunto de años
-    n = 1
+    n = 2
     #fechas
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2012-01-01',format='%Y-%m-%d')
+    fin = pd.to_datetime('2020-01-01',format='%Y-%m-%d')
     
     dias = fin-inicio
     fin_0 = inicio +  dias/n
     
-    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin_0, freq='D', closed='right'))
+    Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin_0 ],  index = pd.date_range(inicio, fin_0, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 1
+    minYr = 0
 
   #%%Crear indice de fechas
     
@@ -98,6 +98,9 @@ def main():
     # Q_daily_filtradas = Q_daily[estaciones_minimas]
 
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
+    
+    del Q_daily
+    gc.collect()
     
     #%% Relleno con OLR
     
@@ -158,7 +161,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 20
+    n_multivariables = 10
     stdOutliers = 3
     
     learnt_month = {x : '' for x in meses}
