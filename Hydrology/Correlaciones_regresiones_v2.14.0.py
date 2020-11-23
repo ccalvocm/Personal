@@ -96,6 +96,12 @@ def main():
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
     Q_month = Q_daily_filtradas.resample('MS').median()
     
+    Q_month_mean = Q_daily_filtradas.groupby(Q_daily.index.month).mean()    
+    Q_month_std = Q_daily_filtradas.groupby(Q_daily.index.month).std()    
+    Q_month_mean = (Q_month_mean.fillna(method='ffill') + Q_month_mean.fillna(method='bfill'))/2
+    Q_month_std = (Q_month_std.fillna(method='ffill') + Q_month_std.fillna(method='bfill'))/2
+    
+    
     #%% Relleno con OLR
     
     coef_m_mensuales = pd.DataFrame( index = meses, columns = Q_daily_filtradas.columns)
@@ -174,8 +180,9 @@ def main():
             correl = Q_daily_mes.corr()
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
-            
-            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
+        
+                      
+            imp = IterativeImputer(max_iter=2, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.mean().std(), sample_posterior = True)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             # IterativeImputer()
             imp.fit(Q_daily_MLR_mes.values.T)
@@ -195,6 +202,8 @@ def main():
             gc.collect()
             del imp
             del A
+            
+    Q_daily_filtradas = Q_daily_filtradas.resample('MS').median()          
 #Graficar
     nticks = 2
     plt.close("all")

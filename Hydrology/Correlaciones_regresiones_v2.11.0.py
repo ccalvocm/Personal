@@ -154,7 +154,7 @@ def main():
     
     Q_daily_MLR = Q_daily_filtradas.copy()
     
-    n_multivariables = 30
+    n_multivariables = 33
     stdOutliers = 2
         
     for ind,col in enumerate(Q_daily_filtradas.columns):
