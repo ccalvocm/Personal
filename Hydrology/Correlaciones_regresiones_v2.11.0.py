@@ -194,13 +194,25 @@ def main():
             gc.collect()
             del imp
             del A
+
+    ruta_Git = 'D:\GitHub'
+    ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv'
+    Q_daily_MLR = pd.read_csv(ruta_Q_rellenos, index_col = 0)
+    Q_daily_MLR.index = pd.to_datetime(Q_daily_MLR.index)
+    
+  
+        
 #Graficar
     nticks = 2
     plt.close("all")
     fig = plt.figure()
     for ind,col in enumerate(Q_daily_filtradas.columns):
         fig.add_subplot(8,4,ind+1)
-        ax1 = Q_daily_MLR[col].plot(linewidth = 3)
+        mask = Q_daily_filtradas[col].isna()
+        aux = Q_daily_MLR[col]
+        aux.loc[aux[mask].index,col] = np.nan
+        ax1 = aux[col].plot(linewidth = 3)
+        # ax1 = Q_daily_MLR[col].plot(linewidth = 3)
         Q_daily_filtradas[col].plot(ax = ax1, linewidth = 1)
         
         ticks = ax1.xaxis.get_ticklocs()[::nticks]
@@ -213,5 +225,5 @@ def main():
         plt.ylabel('Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv')
+    # Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv')
 
