@@ -39,15 +39,15 @@ def CVEParser(txt_):
             elif len(L) > 1:
                 data.append(L)
                 n +=1
-            else:
-                pass
-            if n >= 7:
+                print(n)
+                print(L)
+            if n >= 5:
                 n = 0
                 CVE[station] = data
             else:
                 pass
-
-    return CVE
+    
+        return CVE
 
 
 def CVE(dataframe, quantiles, months = ['Jan', 'Feb', 'Mar', 'Apr', 'May',
@@ -131,94 +131,95 @@ def main():
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
   ruta_Git = 'D:\GitHub'
   ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv'
-  ruta_Q = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
-
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction.csv'
 
 
   # ruta_Q_rellenos = ruta_Git+r'\WEAP-MODFLOW-personal\Hydrology\Q_relleno_MLR_Maipo_1950-2001.csv'
-  probabilidades_excedencia = [.05, .1, .2, .5, .85, .95]
+  probabilidades_excedencia_grupo1 = [.05, .1, .5, .85, .95]
+  probabilidades_excedencia_grupo2 = [.05, .2, .5, .85, .95]
   
-  estaciones_date = {'05710001-K': ['1950-01-01', '2001-12-31'],
-       '05701001-0': ['1979-01-01', '2001-12-31'],
-       '05701002-9': ['1962-01-01', '1993-12-31'],
-       '05702001-6': ['1950-01-01', '2001-12-31'],
-       '05704002-5': ['1950-01-01', '2001-12-31'],
-       '05705001-2': ['1977-01-01', '2001-12-31'],
-       '05706001-8': ['1977-01-01', '2001-12-31'],
-       '05707002-1': ['1950-01-01', '2001-12-31'],
-       '05721001-K': ['1986-01-01', '2001-12-31'],
-       '05722001-5': ['1952-01-01', '2001-12-31'],
-       '05722002-3': ['1950-01-01', '2001-12-31'],
-       '05716001-2': ['1981-01-01', '2001-12-31'],
-       '05735001-6': ['1980-01-01', '2001-12-31'],
-       '05737002-5': ['1959-01-01', '2001-12-31'],
-       '05741001-9': ['1950-01-01', '2001-12-31'],
-       '05746001-6': ['1986-01-01', '2001-12-31'],
-       '05748001-7': ['1979-01-01', '2001-12-31']}
+  # Grupo de estaciones
   
-  # estaciones_date = {'05710001-K': ['1950-01-01', '1998-12-31'],
-  #      '05702001-6': ['1950-01-01', '1998-12-31'],
-  #      '05722002-3': ['1962-01-01', '1998-12-31'],
-  #      '05737002-5': ['1950-01-01', '1998-12-31']
-  #      } 
+  grupo2 = ['05722001-5', '05722002-3', '05737002-5', '05746001-6']
+
+  # estaciones_date = {'05710001-K': ['1950-01-01', '2001-12-31'],
+  #      '05701001-0': ['1979-01-01', '2001-12-31'],
+  #      '05701002-9': ['1962-01-01', '1993-12-31'],
+  #      '05702001-6': ['1950-01-01', '2001-12-31'],
+  #      '05704002-5': ['1950-01-01', '2001-12-31'],
+  #      '05705001-2': ['1977-01-01', '2001-12-31'],
+  #      '05706001-8': ['1977-01-01', '2001-12-31'],
+  #      '05707002-1': ['1950-01-01', '2001-12-31'],
+  #      '05721001-K': ['1986-01-01', '2001-12-31'],
+  #      '05722001-5': ['1952-01-01', '2001-12-31'],
+  #      '05722002-3': ['1950-01-01', '2001-12-31'],
+  #      '05716001-2': ['1981-01-01', '2001-12-31'],
+  #      '05735001-6': ['1980-01-01', '2001-12-31'],
+  #      '05737002-5': ['1959-01-01', '2001-12-31'],
+  #      '05741001-9': ['1950-01-01', '2001-12-31'],
+  #      '05746001-6': ['1986-01-01', '2001-12-31'],
+  #      '05748001-7': ['1979-01-01', '2001-12-31']}
   
+  estaciones_date = {'05710001-K': ['1950-01-01', '1998-12-31'],
+       '05722001-5': ['1950-01-01', '1998-12-31'],
+       '05722002-3': ['1950-01-01', '1998-12-31'],
+       '05737002-5': ['1950-01-01', '1998-12-31'],
+       '05716001-2': ['1981-01-01', '2007-12-31'],
+       '05748001-7': ['1980-01-01', '2007-12-31'],
+       '05717005-0': ['1950-01-01', '1960-12-31'],
+       '05746001-6': ['1987-01-01', '2005-12-31']
+       } 
   ruta = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion'
   os.chdir(ruta)
 
-  ruta_datos = 'Validacion_Maipo_DGA_2004.txt'
+  # ruta_datos = 'Validacion_Maipo_DGA_2004.txt'
+  ruta_datos = 'Validacion_Maipo_DGA_2015.txt'
   
   cve = CVEParser(ruta_datos)
+  
   Q_relleno = pd.read_csv(ruta_Q_rellenos, index_col = 0)[estaciones_date.keys()]
   Q_relleno.index = pd.to_datetime(Q_relleno.index)
   inicio = pd.to_datetime('1950-01-01',format='%Y-%m-%d')
-  fin = pd.to_datetime('2001-12-31',format='%Y-%m-%d')
+  fin = pd.to_datetime('2007-12-31',format='%Y-%m-%d')
   Q_relleno = pd.DataFrame(Q_relleno[Q_relleno.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
   
-  Q = pd.read_excel(ruta_Q, col_index = 0)
-  Q = Q[estaciones_date.keys()]
-  
-  Q.index = pd.to_datetime(Q.index)
-  inicio = pd.to_datetime('1950-01-01',format='%Y-%m-%d')
-  fin = pd.to_datetime('2001-12-31',format='%Y-%m-%d')
-  Q = pd.DataFrame(Q[(Q.index <= fin) &  (Q.index >= inicio)],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
-  Q = Q.dropna()
-    
    # crear lista de pbb de excedencia de meses por estaciones
 
   caudales_pbb_mes = {x:'' for x in estaciones_date.keys()}
-  caudales_pbb_mes_sinr = {x:'' for x in estaciones_date.keys()}
-
 
   # calcular CVE
 
-  pbb_mensuales = pd.DataFrame(columns=[probabilidades_excedencia], index = [0,1,2,3,4,5,6,7,8,9,10,11])
-  pbb_mensuales_sinr = pd.DataFrame(columns=[probabilidades_excedencia], index = [0,1,2,3,4,5,6,7,8,9,10,11])
-
+  pbb_mensuales = pd.DataFrame(columns=range(4), index = [0,1,2,3,4,5,6,7,8,9,10,11])
 
   r = -1
   c = 0
   plt.close("all")
-  fig, axes = plt.subplots(6,3)
+  fig, axes = plt.subplots(3,3)
   
   N_SE = []
-
   # iterar sobre estaciones
   for i,estacion in enumerate(estaciones_date):
                   
-    cve_informe = pd.DataFrame(cve[estacion]).iloc[:-1,:].transpose().astype(float)
+    cve_informe = pd.DataFrame(cve[estacion]).transpose().astype(float)
     
+    probabilidades_excedencia = probabilidades_excedencia_grupo1
+    
+    if estacion in grupo2:
+    
+        probabilidades_excedencia = probabilidades_excedencia_grupo2
+        
     for index, col in enumerate(probabilidades_excedencia):
         
         fechas = pd.to_datetime(estaciones_date[estacion])
     
         CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[str(probabilidades_excedencia[index])][estacion]
-       
-        pbb_mensuales.loc[pbb_mensuales.index, col] =  CVE_rellenada.to_list()
-    
+
+        pbb_mensuales.loc[pbb_mensuales.index, index] =  CVE_rellenada.to_list()
         
     caudales_pbb_mes[estacion] = pbb_mensuales
     
     N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
+
     
 #Graficar
 
@@ -238,6 +239,8 @@ def main():
     c += 1
         
   axis.legend(['Informe','Rellenada'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
+  
+  
 
 if __name__ == '__main__':
     main()
