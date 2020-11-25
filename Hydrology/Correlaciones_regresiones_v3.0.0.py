@@ -171,6 +171,8 @@ def main():
             stdOutliers = 0.1
             
             Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
+        else:
+            stdOutliers = 3.
 
         for mes in meses:
              
