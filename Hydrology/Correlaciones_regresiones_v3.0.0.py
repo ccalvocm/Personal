@@ -153,7 +153,7 @@ def main():
           
     #%% Multivariable
     
-    n_multivariables = 32
+    n_multivariables = 30
     
     stdOutliers = 3.
 
@@ -167,14 +167,23 @@ def main():
         
         print(col)
         
-        if col in ['05746001-6','05722001-5','05716001-2']:
-            stdOutliers = 0.1
+        if col in ['05722001-5']:
+            stdOutliers = 2.5
             
             Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
+        
+        elif col in ['05746001-6']:
+            stdOutliers = 1.5
+            
+            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
+            
         else:
             stdOutliers = 3.
 
         for mes in meses:
+            
+            print(str(mes))
+
              
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
             
@@ -195,7 +204,6 @@ def main():
             
             imp.fit(x.values.T)
             A = imp.transform(x.values.T).T
-            # A = imp.transform(Q_daily_MLR_mes.values.T.tolist()).T
             Q_daily_MLR_mes = pd.DataFrame(A, columns = x.columns, index = x.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
             # Y = pd.DataFrame(Q_daily_MLR_mes[col])
@@ -238,5 +246,5 @@ def main():
         plt.ylabel('$\Delta$ Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv')
 
