@@ -162,16 +162,14 @@ def main():
           
     #%% Multivariable
     
-    n_multivariables = 30
+    n_multivariables = 25
     
     stdOutliers = 3.
     
     learnt_month = {x : '' for x in meses}
-
+       
     Q_daily_MLR = Q_daily_filtradas.copy()
-    
-    Q_daily_MLR.loc[Q_daily_MLR.index] = Q_daily_MLR[np.abs(Q_daily_MLR-Q_daily_MLR.mean())<=(stdOutliers*Q_daily_MLR.std())]
-    
+        
     estaciones = ['05710001-K', '05722001-5', '05722002-3', '05737002-5', '05716001-2','05748001-7', '05746001-6']
 
     for ind,col in enumerate(estaciones):
@@ -183,13 +181,13 @@ def main():
 #            
 #            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
         
-        if col in ['05746001-6']:
-            stdOutliers = 3.
+#        if col in ['05746001-6']:
+#            stdOutliers = 3.
             
 #            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
             
-        else:
-            stdOutliers = 3.
+#        else:
+#            stdOutliers = 3.
             
 #            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
 
@@ -201,7 +199,7 @@ def main():
             
             else:
             
-                print(str(mes))
+#                print(str(mes))
                  
                 Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
                 
@@ -215,6 +213,12 @@ def main():
                 est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
                 x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
                 x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
+                
+                try:
+                    x.loc[x.index,'05746001-6'] = x[np.abs(x-x.mean())<=(.5*x.std())]['05746001-6']
+                except:
+                    err = 'No hay información en el mes'
+
                 x = x[x[x.count().idxmax()].notna()]                 
                 
                 est_na = x.count()[x.count() == 0].index.values.tolist()
@@ -222,7 +226,7 @@ def main():
                 x = x.drop(est_na, axis = 1)
                 
                 max_value_ = x.mean()+stdOutliers*x.std()
-                                
+                
 #                max_value_.loc[est_na] = Q_month_mean[est_na].loc[mes]+stdOutliers*Q_month_std[est_na].loc[mes]                
 
 #                imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, sample_posterior = True, verbose = 2)
@@ -243,9 +247,10 @@ def main():
                 # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
 #                learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+#                learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
-# learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
+                Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+
 
             # gc.collect()
             # del imp
