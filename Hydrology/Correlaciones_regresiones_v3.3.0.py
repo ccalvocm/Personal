@@ -215,7 +215,7 @@ def main():
                 x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
                 
                 try:
-                    x.loc[x.index,'05746001-6'] = x[np.abs(x-x.mean())<=(.5*x.std())]['05746001-6']
+                    x.loc[x.index,'05746001-6'] = x[np.abs(x-x.mean())<=(.8*x.std())]['05746001-6']
                 except:
                     err = 'No hay información en el mes'
 
