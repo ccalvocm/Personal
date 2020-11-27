@@ -184,7 +184,7 @@ def main():
             Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
         
         elif col in ['05746001-6']:
-            stdOutliers = 3.
+            stdOutliers = 2.
             
             Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
             
@@ -211,7 +211,7 @@ def main():
                 
                 correl = Q_daily_mes.corr()
                 est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-                x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()]
+                x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
                 x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
                 x = x[x[x.count().idxmax()].notna()]                 
                 
@@ -224,7 +224,7 @@ def main():
 #                max_value_.loc[est_na] = Q_month_mean[est_na].loc[mes]+stdOutliers*Q_month_std[est_na].loc[mes]                
 
 #                imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, sample_posterior = True, verbose = 2)
-                imp = IterativeImputer(max_iter=10, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True, skip_complete = False, verbose = 3)
+                imp = IterativeImputer(max_iter=10, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
     #             imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True, skip_complete = True)
                 # Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
                 
@@ -241,7 +241,7 @@ def main():
                 # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
 #                learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
-        Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
 
 # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
