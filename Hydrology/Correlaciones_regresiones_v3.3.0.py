@@ -162,7 +162,7 @@ def main():
           
     #%% Multivariable
     
-    n_multivariables = 33
+    n_multivariables = 30
     
     stdOutliers = 3.
     
@@ -178,18 +178,20 @@ def main():
         
         print(col)
         
-        if col in ['05722001-5']:
+#        if col in ['05722001-5']:
+#            stdOutliers = 3.
+#            
+#            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
+        
+        if col in ['05746001-6']:
             stdOutliers = 3.
             
-            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
-        
-        elif col in ['05746001-6']:
-            stdOutliers = 2.
-            
-            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
+#            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
             
         else:
             stdOutliers = 3.
+            
+#            Q_daily_MLR.loc[Q_daily_MLR.index, col] = Q_daily_MLR[np.abs(Q_daily_MLR[col]-Q_daily_MLR[col].mean())<=(stdOutliers*Q_daily_MLR[col].std())][col]
 
         for mes in meses:
             

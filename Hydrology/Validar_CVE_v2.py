@@ -243,7 +243,7 @@ def main():
   axis.legend(['Informe','Rellenada'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
   
   
-
+#%%
 if __name__ == '__main__':
     main()
         
