@@ -174,7 +174,7 @@ def main():
   
             
             # imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True)
-            imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, sample_posterior = True)
+            imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, sample_posterior = True, verbose = 2)
             Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
             # IterativeImputer()
             imp.fit(Q_daily_MLR_mes.values.T)
