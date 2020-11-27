@@ -162,7 +162,7 @@ def main():
           
     #%% Multivariable
     
-    n_multivariables = 32
+    n_multivariables = 33
     
     stdOutliers = 3.
     
@@ -224,7 +224,7 @@ def main():
 #                del x[est_na[0]]
 #                max_value_.loc[est_na] = Q_month_mean[est_na].loc[mes]+stdOutliers*Q_month_std[est_na].loc[mes]                
             
-                imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = max_value_.values, sample_posterior = True, skip_complete = False)
+                imp = IterativeImputer(max_iter=10, random_state=0, min_value = 0, max_value = max_value_.values, sample_posterior = True, skip_complete = False)
     #             imp = IterativeImputer(max_iter=1, random_state=0, min_value = 0, max_value = y.mean()+stdOutliers*y.std(), sample_posterior = True, skip_complete = True)
                 # Q_daily_MLR_mes = x[x[x.count().idxmax()].notna()]
                 
@@ -240,7 +240,7 @@ def main():
                 # Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].rolling(60).mean())
 #                learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
-#        Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].mean())
+        Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
 
 # learnt_month[mes] = Q_daily_MLR_mes.columns.to_list()
 
