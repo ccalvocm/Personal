@@ -228,9 +228,10 @@ def main():
     
     N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
     
-    print(estacion)
+    if estacion == '05748001-7':
 
-    print(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
+        print(caudales_pbb_mes[estacion])
+        print(cve_informe)
 
     
 #Graficar
