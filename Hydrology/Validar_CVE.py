@@ -165,8 +165,8 @@ def main():
        '05737002-5': ['1959-01-01', '2001-12-31'],
        '05741001-9': ['1950-01-01', '2001-12-31'],
        '05746001-6': ['1986-01-01', '2001-12-31'],
-#       '05748001-7': ['1979-01-01', '2001-12-31']
-        '05748001-7': ['1986-01-01', '2005-12-31']
+       '05748001-7': ['1979-01-01', '2001-12-31']
+#        '05748001-7': ['1986-01-01', '2005-12-31']
 }
   
   # estaciones_date = {'05710001-K': ['1950-01-01', '1998-12-31'],
@@ -267,17 +267,17 @@ def main():
     
     for index, col in enumerate(probabilidades_excedencia):
         
-#        fechas = pd.to_datetime(estaciones_date[estacion])
+        fechas = pd.to_datetime(estaciones_date[estacion])
     
 #        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[str(probabilidades_excedencia[index])][estacion]
-        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[estacion][str(probabilidades_excedencia[index])]
+        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[estacion][str(probabilidades_excedencia[index])]
        
         pbb_mensuales.loc[pbb_mensuales.index, col] =  CVE_rellenada.to_list()
     
         
     caudales_pbb_mes[estacion] = pbb_mensuales
     
-    N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
+    N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))s
     
 #Graficar
 

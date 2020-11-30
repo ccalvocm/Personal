@@ -59,9 +59,15 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
+#    year_i = 1984
+#    year_f = 2004
+    
+    year_i = 1949
+    year_f = 2001
+    
     #fechas
-    inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('2002-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
+    fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
@@ -81,11 +87,10 @@ def main():
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= minYr]
     
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
-    Q_daily_filtradas = Q_daily_filtradas.resample('MS').mean()
 
     #%% Multivariable
     
-    n_multivariables = 25
+    n_multivariables = 20
     
     stdOutliers = 3.
            
@@ -118,7 +123,7 @@ def main():
             
             max_value_ = x.mean()+stdOutliers*x.std()
             
-            imp = IterativeImputer(max_iter=10, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
+            imp = IterativeImputer(max_iter=11, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
             Y = imp.fit_transform(x)
             Q_daily_MLR_mes = pd.DataFrame(Y, columns = x.columns, index = x.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
@@ -146,5 +151,5 @@ def main():
         plt.ylabel('$\Delta$ Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2002_outlier_in_correction_mean.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_mean.csv')
 
