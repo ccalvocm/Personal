@@ -19,6 +19,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from hydroeval import evaluator, nse
+import numpy as np
 
 def parametros_distribucion(data_, distr_):
     params = distr_.fit(data_)
@@ -118,7 +119,15 @@ def NSE(nse, sim_flow, obs_flow, axis=1):
     my_nse = evaluator(nse, serie_sim, serie_obs, axis=1)
     return my_nse
     
-
+def Qmm(df_, estacion):
+  df = df_.groupby(df_.index.month).mean()
+  df = df[estacion].reindex([4,5,6,7,8,9,10,11,12,1,2,3])
+  df = df.reset_index()
+  df = df.set_index(pd.Index(range(1,13)))
+  del df['index']
+  df.columns = [estacion]
+  return df
+  
 def main():
 
 #%%
@@ -183,51 +192,49 @@ def main():
   fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
     
   Q_relleno = pd.DataFrame(Q_relleno[Q_relleno.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
-  Q_relleno = Q_relleno.resample('MS').mean()
-  Q_Maipo_Cabimbao = Q_relleno.groupby(Q_relleno.index.month).mean()
-  Q_Maipo_Cabimbao = Q_Maipo_Cabimbao['05748001-7'].reindex([4,5,6,7,8,9,10,11,12,1,2,3])
-  Q_Maipo_Cabimbao = Q_Maipo_Cabimbao.reset_index()
-  Q_Maipo_Cabimbao = Q_Maipo_Cabimbao.set_index(pd.Index(range(1,13)))
-  del Q_Maipo_Cabimbao['index']
-  Q_Maipo_Cabimbao.columns = ['Qmm Rellenado']
+  Q_relleno_mean = Q_relleno.resample('MS').mean()
+  Q_Maipo_Cabimbao = Qmm(Q_relleno_mean,'05748001-7')
+  Q_Maipo_Manzano = Qmm(Q_relleno_mean,'05710001-K')
   
-  Q_Maipo_Manzano = Q_relleno.groupby(Q_relleno.index.month).mean()
-  Q_Maipo_Manzano = Q_Maipo_Manzano['05710001-K'].reindex([4,5,6,7,8,9,10,11,12,1,2,3])
-  Q_Maipo_Manzano = Q_Maipo_Manzano.reset_index()
-  Q_Maipo_Manzano = Q_Maipo_Manzano.set_index(pd.Index(range(1,13)))
-  del Q_Maipo_Manzano['index']
-  Q_Maipo_Manzano.columns = ['Qmm Rellenado']
+  Qmm_Maipo = pd.concat([Q_Maipo_Cabimbao,Q_Maipo_Manzano],axis=1, sort=False)
 
   ruta_Maipo_Cabimbao = r'C:\Users\ccalvo\Documents\GitHub\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\CVE_RIO MAIPO EN CABIMBAO_ABHN.txt'
   ruta_Maipo_Manzano = r'C:\Users\ccalvo\Documents\GitHub\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\CVE_RIO MAIPO EN EL MANZANO_ABHN.txt'
 
   Q_Maipo_Cabimbao_ABHN= pd.read_csv(ruta_Maipo_Cabimbao, sep = ';', names =  ['mes','Q'])
-  CVE_Maipo_Cabimbao_ABHN = pd.DataFrame(index = range(1,13), columns = ['Qmm Balance Hídrico'])
+  CVE_Maipo_Cabimbao_ABHN = pd.DataFrame(index = range(1,13), columns = ['05748001-7'])
 
   Q_Maipo_Manzano_ABHN = pd.read_csv(ruta_Maipo_Manzano, sep = ';', names =  ['mes','Q'])
-  CVE_Maipo_Manzano_ABHN = pd.DataFrame(index = range(1,13), columns = ['Qmm Balance Hídrico'])
+  CVE_Maipo_Manzano_ABHN = pd.DataFrame(index = range(1,13), columns = ['05710001-K'])
     
   for i in range(1,13):
       CVE_Maipo_Cabimbao_ABHN.loc[i] = Q_Maipo_Cabimbao_ABHN.iloc[(Q_Maipo_Cabimbao_ABHN['mes']-i).abs().argsort()[0]].values[-1]
       CVE_Maipo_Manzano_ABHN.loc[i] = Q_Maipo_Manzano_ABHN.iloc[(Q_Maipo_Manzano_ABHN['mes']-i).abs().argsort()[0]].values[-1]
 
-  ax = Q_Maipo_Cabimbao.plot()
-  CVE_Maipo_Cabimbao_ABHN.plot(ax=ax)
-  ax.set_xticks(range(13)) 
-  ax.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
-                     'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
-  ax.set_ylabel('Caudal ($m^3/s$)')
-  ax.set_ylim(bottom = 0)
+  CVE_ABHN = pd.concat([CVE_Maipo_Cabimbao_ABHN,CVE_Maipo_Manzano_ABHN],axis=1, sort=False)
 
-  plt.figure()
-  ax = Q_Maipo_Manzano.plot()
-  CVE_Maipo_Manzano_ABHN.plot(ax=ax)
-  ax.set_xticks(range(13)) 
-  ax.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
-                     'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
-  ax.set_ylabel('Caudal ($m^3/s$)')
-  ax.set_ylim(bottom = 0)
+  plt.close("all")
+  fig = plt.figure()
+  props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+
+  for i,col in enumerate(Qmm_Maipo.columns):
+      fig.add_subplot(2,2,i+1)
+      
+      ax = CVE_ABHN[col].plot(color = 'r')
+      Qmm_Maipo[col].plot(ax=ax, color = 'b')
+      N_SE = NSE(nse,Qmm_Maipo[col],CVE_ABHN[col].astype(np.float), axis=1) 
+      ax.set_xticks(range(13)) 
+      ax.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
+                         'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
+      ax.set_ylabel('Caudal ($m^3/s$)')
+      ax.set_ylim(bottom = 0)
+      ax.set_title(col)
+      ax.text(0.05, 0.05, 'N-SE = '+str(N_SE), transform=ax.transAxes, fontsize=14,
+        verticalalignment='bottom', bbox=props)
+
+  ax.legend(['Rellenada','Informe'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
   
+
 
   Q = pd.read_excel(ruta_Q, col_index = 0)
   Q = Q[estaciones_date.keys()]
@@ -287,6 +294,7 @@ def main():
                      'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
     axis.set_ylabel('Q $m^3/s$')
     axis.set_title('Estación '+estacion)
+    axis.set_ylim(bottom = 0)
 
     c += 1
         
