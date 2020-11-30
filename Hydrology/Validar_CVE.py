@@ -14,7 +14,7 @@ def limpiar_kernel():
         pass
  
 limpiar_kernel()
-
+#%%
 import pandas as pd 
 import matplotlib.pyplot as plt
 import os
@@ -127,6 +127,8 @@ def Qmm(df_, estacion):
   del df['index']
   df.columns = [estacion]
   return df
+
+#%%
   
 def main():
 
@@ -140,8 +142,8 @@ def main():
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
 #  ruta_Git = 'D:\GitHub'
-#  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2002_outlier_in_correction_mean.csv'
-  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1984-2004_outlier_in_correction_mean.csv'
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction_mean.csv'
+#  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1984-2004_outlier_in_correction_mean.csv'
   ruta_Q = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
 
 
@@ -277,7 +279,7 @@ def main():
         
     caudales_pbb_mes[estacion] = pbb_mensuales
     
-    N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))s
+    N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
     
 #Graficar
 

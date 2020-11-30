@@ -26,6 +26,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from sklearn.impute import SimpleImputer
+
 
 #funciones
 
@@ -90,13 +92,28 @@ def main():
 
     #%% Multivariable
     
-    n_multivariables = 30
+    n_multivariables = len(Q_daily_filtradas.columns)
     
     stdOutliers = 3.
            
     Q_daily_MLR = Q_daily_filtradas.copy()
+    
+    estaciones = ['05710001-K','05701001-0', '05701002-9','05702001-6',
+       '05704002-5',
+       '05705001-2',
+       '05706001-8',
+       '05707002-1',
+       '05721001-K',
+       '05722001-5',
+       '05722002-3',
+       '05716001-2',
+       '05735001-6',
+       '05737002-5',
+       '05741001-9',
+       '05746001-6',
+       '05748001-7']
             
-    for ind,col in enumerate(Q_daily_filtradas.columns):
+    for ind,col in enumerate(estaciones):
         
         print('Rellenando estación '+str(col))
 
@@ -123,14 +140,15 @@ def main():
             
             max_value_ = x.mean()+stdOutliers*x.std()
             
-            imp = IterativeImputer(max_iter=11, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
+            imp = SimpleImputer( max_value = max_value_, sample_posterior = True)
+#            imp = IterativeImputer(max_iter=11, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
             Y = imp.fit_transform(x)
             Q_daily_MLR_mes = pd.DataFrame(Y, columns = x.columns, index = x.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
 
             Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
 
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].mean())
 
 #Graficar
     nticks = 2
