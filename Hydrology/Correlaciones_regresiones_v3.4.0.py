@@ -61,11 +61,11 @@ def main():
     
     #fechas
     inicio = pd.to_datetime('1949-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime('1998-12-31',format='%Y-%m-%d')
+    fin = pd.to_datetime('2002-12-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 1
+    minYr = 5
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -81,7 +81,7 @@ def main():
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= minYr]
     
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
-    
+    Q_daily_filtradas = Q_daily_filtradas.resample('MS').mean()
 
     #%% Multivariable
     
@@ -112,7 +112,7 @@ def main():
             x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
             x = x[x[x.count().idxmax()].notna()]                 
             
-            est_na = x.count()[x.count() == 0].index.values.tolist()
+            est_na = x.count()[x.count() < 2].index.values.tolist()
             
             x = x.drop(est_na, axis = 1)
             
@@ -146,5 +146,5 @@ def main():
         plt.ylabel('$\Delta$ Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-1999_outlier_in_correction_sin_saltar.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_1950-2002_outlier_in_correction_mean.csv')
 
