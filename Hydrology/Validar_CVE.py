@@ -120,7 +120,8 @@ def NSE(nse, sim_flow, obs_flow, axis=1):
     
 
 def main():
-  
+
+#%%
 # Informe: 
 # DIAGNOSTICO Y CLASIFICACION DE LOS CURSOS Y CUERPOS DE AGUA SEGUN OBJETIVOS DE CALIDAD
 # CUENCA DEL RIO MAIPO
@@ -129,8 +130,9 @@ def main():
   
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
-  ruta_Git = 'D:\GitHub'
-  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv'
+#  ruta_Git = 'D:\GitHub'
+#  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_correction_median.csv'
+  ruta_Q_rellenos = ruta_Git+r'\Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction.csv'
   ruta_Q = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
 
 
@@ -230,6 +232,7 @@ def main():
     cve_informe.plot(color = 'r', ax = axis, legend=False, linewidth = 3)
     caudales_pbb_mes[estacion].plot(ax = axis, color = 'b', legend=False, linewidth = 3)
 
+    axis.set_xticks(range(13)) 
     axis.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
                      'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
     axis.set_ylabel('Q $m^3/s$')
@@ -239,6 +242,7 @@ def main():
         
   axis.legend(['Informe','Rellenada'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
 
+#%%
 if __name__ == '__main__':
     main()
         

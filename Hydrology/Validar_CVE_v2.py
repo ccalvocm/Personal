@@ -133,7 +133,7 @@ def main():
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
 #  ruta_Git = 'D:\GitHub'
-  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction_sin_saltar.csv'
   # ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
 
 
