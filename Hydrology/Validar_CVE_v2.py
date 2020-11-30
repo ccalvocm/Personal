@@ -132,7 +132,7 @@ def main():
   
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
-  ruta_Git = 'D:\GitHub'
+#  ruta_Git = 'D:\GitHub'
   ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
   # ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
 
@@ -221,7 +221,16 @@ def main():
         
     caudales_pbb_mes[estacion] = pbb_mensuales
     
+    
+#    print(caudales_pbb_mes[estacion])
+#    
+#    print(cve_informe)
+    
     N_SE.append(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
+    
+    print(estacion)
+
+    print(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1))
 
     
 #Graficar
@@ -234,8 +243,8 @@ def main():
     cve_informe.plot(color = 'r', ax = axis, legend=False, linewidth = 3)
     caudales_pbb_mes[estacion].plot(ax = axis, color = 'b', legend=False, linewidth = 3)
 
-    axis.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
-                     'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
+    axis.set_xticks(range(13)) 
+    axis.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
     axis.set_ylabel('Q $m^3/s$')
     axis.set_title('Estación '+estacion)
 
