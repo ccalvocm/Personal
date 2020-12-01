@@ -59,11 +59,11 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
-#    year_i = 1984
-#    year_f = 2004
+    year_i = 1984
+    year_f = 2004
     
-    year_i = 1949
-    year_f = 2001
+#    year_i = 1949
+#    year_f = 2001
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
@@ -111,7 +111,10 @@ def main():
        '05741001-9',
        '05746001-6',
        '05748001-7']
-            
+
+    # actualizacióin BHN
+    estaciones = ['05722002-3','05748001-7']    
+    
     for ind,col in enumerate(estaciones):
         
         print('Rellenando estación '+str(col))

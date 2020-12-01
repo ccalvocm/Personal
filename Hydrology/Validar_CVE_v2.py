@@ -197,7 +197,7 @@ def main():
   r = -1
   c = 0
   plt.close("all")
-  fig, axes = plt.subplots(3,3)
+  fig, axes = plt.subplots(2,3)
   
   N_SE = []
   # iterar sobre estaciones
@@ -243,6 +243,10 @@ def main():
     axis.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
     axis.set_ylabel('Q $m^3/s$')
     axis.set_title('Estación '+estacion)
+    props = dict(boxstyle='round', facecolor='wheat', alpha=.7)
+    axis.text(0,0,'N-SE = '+str(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1)), transform=axis.transAxes, fontsize=10,
+              verticalalignment='bottom', bbox=props)
+    axis.set_ylim(bottom = 0)
 
     c += 1
         
