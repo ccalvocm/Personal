@@ -26,8 +26,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-from sklearn.impute import SimpleImputer
-
 
 #funciones
 
@@ -95,6 +93,7 @@ def main():
     n_multivariables = len(Q_daily_filtradas.columns)
     
     stdOutliers = 3.
+    
            
     Q_daily_MLR = Q_daily_filtradas.copy()
     
@@ -121,7 +120,7 @@ def main():
             
                  
             Q_daily_mes = Q_daily_filtradas.loc[Q_daily_filtradas.index.month == mes].copy()
-            
+                        
             y = Q_daily_mes[col]
                        
             if y.count() < 1:
@@ -131,30 +130,39 @@ def main():
             correl = Q_daily_mes.corr()
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
+#            
+            stdOutliers = 3.
+            
+            if col in ['05716001-2']:
+                stdOutliers = 1.
+            elif col in ['05748001-7']:
+                stdOutliers = .5
+            elif col in ['05741001-9', '05701001-0']:
+                stdOutliers = 1.e10
+                
             x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
             x = x[x[x.count().idxmax()].notna()]                 
             
-            est_na = x.count()[x.count() < 2].index.values.tolist()
+            est_na = x.count()[x.count() == 0].index.values.tolist()
             
             x = x.drop(est_na, axis = 1)
             
             max_value_ = x.mean()+stdOutliers*x.std()
             
-            imp = SimpleImputer( max_value = max_value_, sample_posterior = True)
-#            imp = IterativeImputer(max_iter=11, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
+            imp = IterativeImputer( imputation_order='random', random_state=0, max_iter=15, min_value = 0, max_value = max_value_, sample_posterior = True)
             Y = imp.fit_transform(x)
             Q_daily_MLR_mes = pd.DataFrame(Y, columns = x.columns, index = x.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
 
-            Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
+            Q_daily_MLR.loc[Q_daily_MLR_mes.index,col] = Q_daily_MLR_mes[col]
 
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].mean())
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
 
 #Graficar
     nticks = 2
     plt.close("all")
     fig = plt.figure()
-    for ind,col in enumerate(Q_daily_filtradas.columns):
+    for ind,col in enumerate(estaciones):
         fig.add_subplot(8,5,ind+1)
 
         ax1 = Q_daily_MLR[col].plot(linewidth = 3)
@@ -169,5 +177,5 @@ def main():
         plt.ylabel('$\Delta$ Q $m^3/s$')
         plt.title('Estación '+col)
     plt.legend(['Predictor','Original'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_mean.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 

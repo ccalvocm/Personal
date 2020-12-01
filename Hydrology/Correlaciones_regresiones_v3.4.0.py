@@ -123,14 +123,14 @@ def main():
             
             max_value_ = x.mean()+stdOutliers*x.std()
             
-            imp = IterativeImputer(max_iter=11, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
+            imp = IterativeImputer(max_iter=13, random_state=0, min_value = 0, max_value = max_value_, sample_posterior = True)
             Y = imp.fit_transform(x)
             Q_daily_MLR_mes = pd.DataFrame(Y, columns = x.columns, index = x.index )
             Q_daily_MLR_mes = Q_daily_MLR_mes.dropna()
 
             Q_daily_MLR.loc[Q_daily_MLR_mes.index,Q_daily_MLR_mes.columns] = Q_daily_MLR_mes[Q_daily_MLR_mes.columns]
 
-            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
+            Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].mean())
 
 #Graficar
     nticks = 2
