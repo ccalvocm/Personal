@@ -54,7 +54,7 @@ def CVEParser(txt_):
 def CVE(dataframe, quantiles, months = ['Jan', 'Feb', 'Mar', 'Apr', 'May',
                                         'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
                                         'Nov', 'Dec'],
-        hydroyear = True, aggregate = False):
+        hydroyear = True, aggregate = True):
     '''
     
 
@@ -142,8 +142,7 @@ def main():
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
 #  ruta_Git = 'D:\GitHub'
-  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction_mean.csv'
-#  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1984-2004_outlier_in_correction_mean.csv'
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1984-2004_outlier_in_correction_mean.csv'
   ruta_Q = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
 
 
@@ -151,23 +150,23 @@ def main():
   # ruta_Q_rellenos = ruta_Git+r'\WEAP-MODFLOW-personal\Hydrology\Q_relleno_MLR_Maipo_1950-2001.csv'
   probabilidades_excedencia = [.05, .1, .2, .5, .85, .95]
   
-  estaciones_date = {'05710001-K': ['1950-01-01', '2001-12-31'],
+  estaciones_date = {'05710001-K': ['1951-01-01', '2001-12-31'],
        '05701001-0': ['1979-01-01', '2001-12-31'],
        '05701002-9': ['1962-01-01', '1993-12-31'],
-       '05702001-6': ['1950-01-01', '2001-12-31'],
-       '05704002-5': ['1950-01-01', '2001-12-31'],
+       '05702001-6': ['1951-01-01', '2001-12-31'],
+       '05704002-5': ['1951-01-01', '2001-12-31'],
        '05705001-2': ['1977-01-01', '2001-12-31'],
        '05706001-8': ['1977-01-01', '2001-12-31'],
-       '05707002-1': ['1950-01-01', '2001-12-31'],
+       '05707002-1': ['1951-01-01', '2001-12-31'],
        '05721001-K': ['1986-01-01', '2001-12-31'],
        '05722001-5': ['1952-01-01', '2001-12-31'],
-       '05722002-3': ['1950-01-01', '2001-12-31'],
+       '05722002-3': ['1951-01-01', '2001-12-31'],
        '05716001-2': ['1981-01-01', '2001-12-31'],
        '05735001-6': ['1980-01-01', '2001-12-31'],
        '05737002-5': ['1959-01-01', '2001-12-31'],
-       '05741001-9': ['1950-01-01', '2001-12-31'],
+       '05741001-9': ['1951-01-01', '2001-12-31'],
        '05746001-6': ['1986-01-01', '2001-12-31'],
-       '05748001-7': ['1979-01-01', '2001-12-31']
+       '05748001-7': ['1980-01-01', '2001-12-31']
 #        '05748001-7': ['1986-01-01', '2005-12-31']
 }
   
@@ -217,7 +216,7 @@ def main():
 
   plt.close("all")
   fig = plt.figure()
-  props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+  props = dict(boxstyle='round', facecolor='wheat', alpha=.7)
 
   for i,col in enumerate(Qmm_Maipo.columns):
       fig.add_subplot(2,2,i+1)
@@ -231,22 +230,29 @@ def main():
       ax.set_ylabel('Caudal ($m^3/s$)')
       ax.set_ylim(bottom = 0)
       ax.set_title(col)
-      ax.text(0.05, 0.05, 'N-SE = '+str(N_SE), transform=ax.transAxes, fontsize=14,
+      ax.text(0.05, 0.05, 'N-SE = '+str(np.round(N_SE,2)), transform=ax.transAxes, fontsize=14,
         verticalalignment='bottom', bbox=props)
 
   ax.legend(['Rellenada','Informe'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
   
+#%% 
+  #Rutas
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2001_outlier_in_correction_median.csv'
 
-
-  Q = pd.read_excel(ruta_Q, col_index = 0)
-  Q = Q[estaciones_date.keys()]
-  
-  Q.index = pd.to_datetime(Q.index)
-  inicio = pd.to_datetime('1950-01-01',format='%Y-%m-%d')
-  fin = pd.to_datetime('2001-12-31',format='%Y-%m-%d')
-  Q = pd.DataFrame(Q[(Q.index <= fin) &  (Q.index >= inicio)],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
-  Q = Q.dropna()
+  # Años
+  year_i = 1949
+  year_f = 2002
     
+  #fechas
+  inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
+  fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
+    
+  Q_relleno = pd.read_csv(ruta_Q_rellenos, index_col = 0)[estaciones_date.keys()]
+  Q_relleno.index = pd.to_datetime(Q_relleno.index)
+  
+  Q_relleno = pd.DataFrame(Q_relleno[Q_relleno.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
+  Q_relleno_mean = Q_relleno.resample('MS').mean()
+  
    # crear lista de pbb de excedencia de meses por estaciones
 
   caudales_pbb_mes = {x:'' for x in estaciones_date.keys()}
@@ -271,8 +277,8 @@ def main():
         
         fechas = pd.to_datetime(estaciones_date[estacion])
     
-#        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[str(probabilidades_excedencia[index])][estacion]
-        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[estacion][str(probabilidades_excedencia[index])]
+        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[str(probabilidades_excedencia[index])][estacion]
+#        CVE_rellenada = CVE(pd.DataFrame(Q_relleno[estacion].loc[(Q_relleno.index <= fechas[-1]) & (Q_relleno.index >= fechas[0])], columns = [estacion], index = Q_relleno.index), probabilidades_excedencia)[estacion][str(probabilidades_excedencia[index])]
        
         pbb_mensuales.loc[pbb_mensuales.index, col] =  CVE_rellenada.to_list()
     
@@ -290,17 +296,20 @@ def main():
     axis = axes[r,c]
     cve_informe.plot(color = 'r', ax = axis, legend=False, linewidth = 3, logy=False)
     caudales_pbb_mes[estacion].plot(ax = axis, color = 'b', legend=False, linewidth = 3, logy=False)
-
+        
     axis.set_xticks(range(13)) 
     axis.set_xticklabels(['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
                      'Nov', 'Dec', 'Jan', 'Feb', 'Mar'])
     axis.set_ylabel('Q $m^3/s$')
     axis.set_title('Estación '+estacion)
     axis.set_ylim(bottom = 0)
+    axis.text(0,0,'N-SE = '+str(np.round(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1),2)), transform=axis.transAxes, fontsize=10,
+    verticalalignment='bottom', bbox=props)
 
     c += 1
         
   axis.legend(['Informe','Rellenada'],bbox_to_anchor=(1.05, 1.05), loc='upper left')    
+  np.mean(N_SE)
 
 #%%
 if __name__ == '__main__':

@@ -133,8 +133,8 @@ def main():
   # inputs:
   ruta_Git = r'C:\Users\ccalvo\Documents\GitHub'
 #  ruta_Git = 'D:\GitHub'
-  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction_sin_saltar.csv'
-  # ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
+#  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction_sin_saltar.csv'
+  ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1950-2008_outlier_in_correction.csv'
 
 
   # ruta_Q_rellenos = ruta_Git+r'\WEAP-MODFLOW-personal\Hydrology\Q_relleno_MLR_Maipo_1950-2001.csv'
@@ -168,8 +168,8 @@ def main():
        '05722002-3': ['1950-01-01', '1998-12-31'],
        '05737002-5': ['1950-01-01', '1998-12-31'],
 #       '05716001-2': ['1981-01-01', '2007-12-31'],
-#       '05748001-7': ['1980-01-01', '2007-12-31'],
-       # '05717005-0': ['1950-01-01', '1960-12-31'],
+       '05748001-7': ['1980-01-01', '2007-12-31'],
+#        '05717005-0': ['1950-01-01', '1960-12-31'],
 #       '05746001-6': ['1987-01-01', '2005-12-31']
        } 
   ruta = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion'
@@ -244,7 +244,7 @@ def main():
     axis.set_ylabel('Q $m^3/s$')
     axis.set_title('Estación '+estacion)
     props = dict(boxstyle='round', facecolor='wheat', alpha=.7)
-    axis.text(0,0,'N-SE = '+str(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1)), transform=axis.transAxes, fontsize=10,
+    axis.text(0,0,'N-SE = '+str(np.round(NSE(nse, caudales_pbb_mes[estacion], cve_informe, axis=1),2)), transform=axis.transAxes, fontsize=10,
               verticalalignment='bottom', bbox=props)
     axis.set_ylim(bottom = 0)
 
