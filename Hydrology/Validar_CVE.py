@@ -145,7 +145,8 @@ def main():
   ruta_Q_rellenos = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maipo_1984-2004_outlier_in_correction_mean.csv'
   ruta_Q = ruta_Git+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
 
-
+  #Propiedades
+  props = dict(boxstyle='round', facecolor='wheat', alpha=.7)
 
   # ruta_Q_rellenos = ruta_Git+r'\WEAP-MODFLOW-personal\Hydrology\Q_relleno_MLR_Maipo_1950-2001.csv'
   probabilidades_excedencia = [.05, .1, .2, .5, .85, .95]
@@ -216,7 +217,6 @@ def main():
 
   plt.close("all")
   fig = plt.figure()
-  props = dict(boxstyle='round', facecolor='wheat', alpha=.7)
 
   for i,col in enumerate(Qmm_Maipo.columns):
       fig.add_subplot(2,2,i+1)

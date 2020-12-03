@@ -50,8 +50,8 @@ def main():
     ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
-    # ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
-    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
+    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\Maipo_cr2corregido_Q.xlsx'
+#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
     Q_daily = pd.read_excel(ruta_Q, index_col = 0)
     Q_daily.index = pd.to_datetime(Q_daily.index)
     
@@ -62,8 +62,8 @@ def main():
 #    year_i = 1984
 #    year_f = 2004
     
-    year_i = 1949
-    year_f = 2001
+    year_i = 1979
+    year_f = 2020
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
@@ -71,7 +71,7 @@ def main():
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 5
+    minYr = 15
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -96,24 +96,10 @@ def main():
     
            
     Q_daily_MLR = Q_daily_filtradas.copy()
-#    
-    estaciones = ['05710001-K','05701001-0', '05701002-9','05702001-6',
-       '05704002-5',
-       '05705001-2',
-       '05706001-8',
-       '05707002-1',
-       '05721001-K',
-       '05722001-5',
-       '05722002-3',
-       '05716001-2',
-       '05735001-6',
-       '05737002-5',
-       '05741001-9',
-       '05746001-6',
-       '05748001-7']
 
     # actualizacióin BHN
 #    estaciones = ['05722002-3','05748001-7']    
+    estaciones = Q_daily_filtradas.columns
     
     for ind,col in enumerate(estaciones):
         
@@ -148,7 +134,7 @@ def main():
             x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
             x = x[x[x.count().idxmax()].notna()]                 
 
-            est_na = x.count()[x.count() == 0].index.values.tolist()
+            est_na = x.count()[x.count() < 2].index.values.tolist()
             
             x = x.drop(est_na, axis = 1)
             
@@ -171,10 +157,11 @@ def main():
     logplot = False
 
     for ind,col in enumerate(estaciones):
-        fig.add_subplot(6,3,ind+1)
+        fig.add_subplot(7,4,ind+1)
         Q_daily_MLR_sim = Q_daily_MLR[col].copy()
         Q_daily_MLR_sim.loc[Q_daily_filtradas[col][Q_daily_filtradas[col].isna()].index] = np.nan
-        ax1 = Q_daily_MLR_sim.plot(linewidth = 3, logy = logplot)
+#        ax1 = Q_daily_MLR_sim.plot(linewidth = 3, logy = logplot)
+        ax1 = Q_daily_MLR[col].plot(linewidth = 3, logy = logplot)
         Q_daily_filtradas[col].plot(ax = ax1, linewidth = 1, logy = logplot)
         diff[col].plot(ax = ax1, linewidth = 4, color = 'k', logy = logplot)
         ticks = ax1.xaxis.get_ticklocs()[::nticks]
@@ -188,5 +175,5 @@ def main():
         plt.title('Estación '+col)
         ax1.set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
+    Q_daily_MLR.to_csv('../Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_relleno.csv')
 
