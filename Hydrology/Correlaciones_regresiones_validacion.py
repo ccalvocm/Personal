@@ -50,8 +50,8 @@ def main():
     ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
-    # ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\RIO MAIPO_Q_diario.csv'
-    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
+    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\Maipo_cr2corregido_Q.xlsx'
+#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
     Q_daily = pd.read_excel(ruta_Q, index_col = 0)
     Q_daily.index = pd.to_datetime(Q_daily.index)
     
