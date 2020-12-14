@@ -62,8 +62,8 @@ def main():
 #    year_i = 1984
 #    year_f = 2004
     
-    year_i = 1979
-    year_f = 2020
+    year_i = 1978
+    year_f = 2019
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
@@ -149,6 +149,10 @@ def main():
 
             Q_daily_MLR.loc[Q_daily_mes.index,col] = Q_daily_MLR.loc[Q_daily_mes.index,col].fillna(Q_daily_MLR.loc[Q_daily_mes.index,col].median())
 
+
+    for col in Q_daily_MLR.columns:
+        indice = Q_daily_filtradas[col][Q_daily_filtradas[col].notna()].index
+        Q_daily_MLR.loc[indice,col] =  Q_daily_filtradas.loc[indice,col] 
 #Graficar
     nticks = 1
     plt.close("all")
@@ -174,6 +178,8 @@ def main():
         plt.ylabel('Q $m^3/s$')
         plt.title('Estación '+col)
         ax1.set_ylim(bottom = 0)
+      
+       
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('../Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_relleno.csv')
+    Q_daily_MLR.to_csv(r'C:\Users\ccalvo\Documents\GitHub\WEAP-MODFLOW-personal\Hydrology/Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_relleno.csv')
 
