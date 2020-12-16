@@ -26,6 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from itertools import cycle
 
 #funciones
 
@@ -40,6 +41,25 @@ def regresion(x_,y_):
 def mejoresCorrelaciones(df, col, Nestaciones):
     ordenados = df.sort_values(by=col, ascending = False)
     return ordenados.index[:Nestaciones]
+
+# Función rut
+def digito_verificador(rut):
+    reversed_digits = map(int, reversed(str(rut)))
+    factors = cycle(range(2, 8))
+    s = sum(d * f for d, f in zip(reversed_digits, factors))
+    if (-s) % 11 > 9:
+        return 'K'
+    else:
+        return (-s) % 11
+
+def extenderQ(dfDGA, dfCR2bueno):
+    
+    for columna in dfDGA.columns:
+#        serie_adicional = dfCR2bueno.loc[dfCR2bueno.index.year <= 2007,columna_CR2]
+        nomissing_DGA = dfDGA[columna][dfDGA[columna].notna()]
+        dfCR2bueno.loc[nomissing_DGA.index,columna] = nomissing_DGA
+    return dfCR2bueno
+       
     
 #%%    
     
@@ -48,11 +68,11 @@ def main():
 #%%    
 #    ruta_GitHub = r'D:\GitHub'
     ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+    ruta_OD = r'C:\Users\ccalvo\OneDrive - ciren.cl'
+    
 
-#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
-#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\Maipo_cr2corregido_Q.xlsx'
-    ruta_Q = ruta_GitHub+r'C:\Users\ccalvo\Documents\GitHub\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Rapel\Rapel_cr2corregido_Q.xlsx'
-#    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\cr2_Maipo_Q.xlsx'
+    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Rapel\Rapel_cr2corregido_Q.xlsx'
+
     Q_daily = pd.read_excel(ruta_Q, index_col = 0)
     Q_daily.index = pd.to_datetime(Q_daily.index)
     
@@ -63,16 +83,17 @@ def main():
 #    year_i = 1984
 #    year_f = 2004
     
-    year_i = 1949
-    year_f = 2001
+    year_i = 1959
+    year_f = 2002
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
     fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
+    
 
     #minimo de años con datos
-    minYr = 5
+    minYr = 10*0.8
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -88,30 +109,35 @@ def main():
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= minYr]
     
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
+    
+    #extender pre 1980
+    
+    Q_cr2_bueno = pd.read_csv(ruta_OD+'\\Of hidrica\\Clima\\Q\\cr2_qflxDaily_2018\\cr2_qflxDaily_2018.txt', sep = ',', na_values=["-9999"], index_col = 0)[[x[:-2] for x in Q_daily_filtradas]].iloc[14:]
+    Q_cr2_bueno.index = pd.to_datetime(Q_cr2_bueno.index) 
+    Q_cr2_bueno = Q_cr2_bueno[((Q_cr2_bueno.index > inicio) & (Q_cr2_bueno.index <= fin))]
+    
+    for x in Q_cr2_bueno.columns:
+        Q_cr2_bueno.rename(columns={x: str(x)+'-'+str(digito_verificador(x))}, inplace=True)  
+    
+    Q_cr2_bueno = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
+    
+    fig, ax = plt.subplots(4,3)
+    ax = ax.reshape(-1)
+    for i, col in enumerate(Q_cr2_bueno.columns):
+        Q_cr2_bueno[col].plot(ax = ax[i], legend = False, color = 'r', linewidth = 3)
+        Q_daily_filtradas[col].plot(ax = ax[i], legend = False, color = 'b')
 
     #%% Multivariable
     
-    n_multivariables = len(Q_daily_filtradas.columns)
+    n_multivariables = 10
     
     stdOutliers = 3.
     
            
     Q_daily_MLR = Q_daily_filtradas.copy()
 #    
-    estaciones = ['05710001-K','05701001-0', '05701002-9','05702001-6',
-       '05704002-5',
-       '05705001-2',
-       '05706001-8',
-       '05707002-1',
-       '05721001-K',
-       '05722001-5',
-       '05722002-3',
-       '05716001-2',
-       '05735001-6',
-       '05737002-5',
-       '05741001-9',
-       '05746001-6',
-       '05748001-7']
+    estaciones = ['06006001-0', '06003001-4', '06018001-6', '06043001-2', '06011001-8', '06013001-9', '06019003-8', '06028001-0', '06027001-5',
+                  '06033001-8', '06034001-3', '06035001-9']
 
     # actualizacióin BHN
 #    estaciones = ['05722002-3','05748001-7']    
@@ -122,12 +148,12 @@ def main():
         
         stdOutliers = 3.
             
-        if col in ['05716001-2']:
-            stdOutliers = 1.
-        elif col in ['05748001-7']:
-            stdOutliers = .325
-        elif col in ['05741001-9', '05701001-0']:
-            stdOutliers = np.infty
+#        if col in ['05716001-2']:
+#            stdOutliers = 1.
+#        elif col in ['05748001-7']:
+#            stdOutliers = .325
+#        elif col in ['05741001-9', '05701001-0']:
+#            stdOutliers = np.infty
 
         for mes in meses:
             
@@ -189,5 +215,5 @@ def main():
         plt.title('Estación '+col)
         ax1.set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
+    Q_daily_MLR.to_csv('Q_relleno_MLR_Rapel_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 
