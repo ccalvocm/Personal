@@ -119,7 +119,7 @@ def main():
     for x in Q_cr2_bueno.columns:
         Q_cr2_bueno.rename(columns={x: str(x)+'-'+str(digito_verificador(x))}, inplace=True)  
     
-    Q_cr2_bueno = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
+    Q_daily_filtradas = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
     
     fig, ax = plt.subplots(4,3)
     ax = ax.reshape(-1)
