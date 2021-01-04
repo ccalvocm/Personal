@@ -68,7 +68,8 @@ def main():
 #%%    
     ruta_GitHub = r'D:\GitHub'
     # ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
-    ruta_OD = r'C:\Users\ccalvo\OneDrive - ciren.cl'
+    ruta_OD = r'E:\CIREN\OneDrive - ciren.cl'
+    # ruta_OD = r'C:\Users\ccalvo\OneDrive - ciren.cl'
     
 
     ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Rapel\Rapel_cr2corregido_Q.xlsx'
@@ -80,11 +81,13 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
-#    year_i = 1984
-#    year_f = 2004
+    # year_i = 1984
+    year_i = 1991
+    year_f = 2004
     
-    year_i = 1959
-    year_f = 2002
+    # year_i = 1959
+    # year_i = 1979
+    # year_f = 2002 #no puede exceder 2008 
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
@@ -93,7 +96,7 @@ def main():
     
 
     #minimo de años con datos
-    minYr = 10*0.8
+    minYr = (year_f-year_i)*0.8
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -141,8 +144,12 @@ def main():
 #               '06028001-0', '06027001-5', '06033001-8',  '06034022-6', '06034001-3', '06035001-9', ]
 
 
-    estaciones = ['06006001-0', '06003001-4', '06018001-6', '06043001-2', '06011001-8', '06013001-9', '06019003-8', '06028001-0', '06027001-5',
-                  '06033001-8', '06034001-3', '06035001-9']
+    estaciones = ['06006001-0', '06003001-4', '06018001-6', '06043001-2', '06011001-8', '06013001-9', '06028001-0', '06027001-5',
+                  '06033001-8', '06034001-3']
+    
+    estaciones = ['06003001-4', '06027001-5']
+    # estaciones = Q_daily_filtradas.columns
+    
 
     # actualizacióin BHN
 #    estaciones = ['05722002-3','05748001-7']    
@@ -151,7 +158,7 @@ def main():
         
         print('Rellenando estación '+str(col))
         
-        stdOutliers = 3.
+        stdOutliers = 30.
             
 #        if col in ['05716001-2']:
 #            stdOutliers = 1.
@@ -175,6 +182,7 @@ def main():
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
 #            
+            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes].copy()
 
                 
             x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
@@ -205,10 +213,10 @@ def main():
     for ind,col in enumerate(estaciones):
         fig.add_subplot(6,3,ind+1)
         Q_daily_MLR_sim = Q_daily_MLR[col].copy()
-        Q_daily_MLR_sim.loc[Q_daily_filtradas[col][Q_daily_filtradas[col].isna()].index] = np.nan
+        # Q_daily_MLR_sim.loc[Q_daily_filtradas[col][Q_daily_filtradas[col].isna()].index] = np.nan
         ax1 = Q_daily_MLR_sim.plot(linewidth = 3, logy = logplot)
         Q_daily_filtradas[col].plot(ax = ax1, linewidth = 1, logy = logplot)
-        diff[col].plot(ax = ax1, linewidth = 4, color = 'k', logy = logplot)
+        # diff[col].plot(ax = ax1, linewidth = 4, color = 'k', logy = logplot)
         ticks = ax1.xaxis.get_ticklocs()[::nticks]
         fig.canvas.draw()
         ticklabels = [l.get_text() for l in ax1.xaxis.get_ticklabels()][::nticks]
