@@ -82,21 +82,23 @@ def main():
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
     # year_i = 1984
-    year_i = 1991
+    year_i = 1990
     year_f = 2004
     
+    year_i = 1986
+    year_f = 2011
     # year_i = 1959
     # year_i = 1979
     # year_f = 2002 #no puede exceder 2008 
     
     #fechas
-    inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime(str(year_i)+'-03-31',format='%Y-%m-%d')
+    fin = pd.to_datetime(str(year_f)+'-03-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
     
 
     #minimo de años con datos
-    minYr = (year_f-year_i)*0.8
+    minYr = 10*0.8
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -124,7 +126,7 @@ def main():
     
     Q_daily_filtradas = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
     
-    fig, ax = plt.subplots(4,3)
+    fig, ax = plt.subplots(4,4)
     ax = ax.reshape(-1)
     for i, col in enumerate(Q_cr2_bueno.columns):
         Q_cr2_bueno[col].plot(ax = ax[i], legend = False, color = 'r', linewidth = 3)
@@ -178,7 +180,7 @@ def main():
             
                 continue
             
-            correl = Q_daily_mes.corr()
+            correl = Q_daily_mes.astype(float).corr()
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
             x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
 #            
@@ -228,5 +230,5 @@ def main():
         plt.title('Estación '+col)
         ax1.set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv('Q_relleno_MLR_Rapel_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
+    Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Rapel_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 
