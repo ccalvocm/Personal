@@ -114,7 +114,7 @@ def main():
        '05748001-7']
 
     # actualizacióin BHN
-#    estaciones = ['05722002-3','05748001-7']    
+#    estaciones = ['05722002-3','05748001-7',]    
     
     for ind,col in enumerate(estaciones):
         
@@ -142,10 +142,7 @@ def main():
             
             correl = Q_daily_mes.corr()
             est_indep = mejoresCorrelaciones(correl, col, n_multivariables)
-            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()
-#            
-
-                
+            x = Q_daily_mes.loc[Q_daily_mes.index.month == mes][est_indep.to_list()].copy()                        
             x = x[np.abs(x-x.mean())<=(stdOutliers*x.std())]
             x = x[x[x.count().idxmax()].notna()]                 
 
