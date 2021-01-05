@@ -54,11 +54,14 @@ def digito_verificador(rut):
 
 def extenderQ(dfDGA, dfCR2bueno):
     
+    dfDGA_aux = dfDGA.copy()
+    dfDGA_aux = dfDGA_aux.loc[dfDGA_aux.index <= '01-01-2008']
+    
     for columna in dfDGA.columns:
 #        serie_adicional = dfCR2bueno.loc[dfCR2bueno.index.year <= 2007,columna_CR2]
-        nomissing_DGA = dfDGA[columna][dfDGA[columna].notna()]
-        dfCR2bueno.loc[nomissing_DGA.index,columna] = nomissing_DGA
-    return dfCR2bueno
+        missing_DGA = dfDGA_aux[columna][dfDGA_aux[columna].isna()]
+        dfDGA.loc[missing_DGA.index,columna] = dfCR2bueno.loc[missing_DGA.index,columna]
+    return dfDGA
        
     
 #%%    
@@ -81,15 +84,9 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
-    # year_i = 1984
-    year_i = 1990
-    year_f = 2004
-    
-    year_i = 1986
-    year_f = 2011
-    # year_i = 1959
-    # year_i = 1979
-    # year_f = 2002 #no puede exceder 2008 
+
+    year_i = 1978
+    year_f = 2020
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-03-31',format='%Y-%m-%d')
@@ -126,7 +123,7 @@ def main():
     
     Q_daily_filtradas = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
     
-    fig, ax = plt.subplots(4,4)
+    fig, ax = plt.subplots(6,4)
     ax = ax.reshape(-1)
     for i, col in enumerate(Q_cr2_bueno.columns):
         Q_cr2_bueno[col].plot(ax = ax[i], legend = False, color = 'r', linewidth = 3)
@@ -146,11 +143,11 @@ def main():
 #               '06028001-0', '06027001-5', '06033001-8',  '06034022-6', '06034001-3', '06035001-9', ]
 
 
-    estaciones = ['06006001-0', '06003001-4', '06018001-6', '06043001-2', '06011001-8', '06013001-9', '06028001-0', '06027001-5',
-                  '06033001-8', '06034001-3']
+    # estaciones = ['06006001-0', '06003001-4', '06018001-6', '06043001-2', '06011001-8', '06013001-9', '06028001-0', '06027001-5',
+    #               '06033001-8', '06034001-3']
     
-    estaciones = ['06003001-4', '06027001-5']
-    # estaciones = Q_daily_filtradas.columns
+    # estaciones = ['06003001-4', '06027001-5']
+    estaciones = Q_daily_filtradas.columns
     
 
     # actualizacióin BHN
@@ -232,6 +229,6 @@ def main():
         plt.title('Estación '+col)
         ax1.set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    plt.savefig(r'E:\CIREN\OneDrive - ciren.cl\Of hidrica\AOHIA_ZC\Etapa 1 y 2\Figuras\Rapel_Residuales_ABHN_1990_2004.png',dpi=300)
+    # plt.savefig(r'E:\CIREN\OneDrive - ciren.cl\Of hidrica\AOHIA_ZC\Etapa 1 y 2\Figuras\Rapel_Residuales_ABHN_1990_2004.png',dpi=300)
     Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Rapel_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 
