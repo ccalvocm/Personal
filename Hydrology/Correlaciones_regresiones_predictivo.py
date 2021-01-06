@@ -62,16 +62,16 @@ def main():
     # year_i = 1984
     # year_f = 2004
     
-    year_i = 1978
+    year_i = 1979
     year_f = 2020
     
     #fechas
-    inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime(str(year_f)+'-03-31',format='%Y-%m-%d')
+    inicio = pd.to_datetime(str(year_i)+'-03-31',format='%Y-%m-%d')
+    fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
-    minYr = 15
+    minYr = 16
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -87,6 +87,7 @@ def main():
     estaciones_minimas = estaciones_minimas[estaciones_minimas['registro']>= minYr]
     
     Q_daily_filtradas = Q_daily[estaciones_minimas.index]
+    print(len(Q_daily_filtradas.columns))
 
     #%% Multivariable
     
