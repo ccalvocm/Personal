@@ -46,8 +46,8 @@ def mejoresCorrelaciones(df, col, Nestaciones):
 def main():    
 
 #%%    
-#    ruta_GitHub = r'D:\GitHub'
-    ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
+    ruta_GitHub = r'D:\GitHub'
+    # ruta_GitHub = r'C:\Users\ccalvo\Documents\GitHub'
 
 #    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
     ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maipo\Maipo_cr2corregido_Q.xlsx'
@@ -59,15 +59,15 @@ def main():
     #meses
     meses = [4,5,6,7,8,9,10,11,12,1,2,3]
     
-#    year_i = 1984
-#    year_f = 2004
+    # year_i = 1984
+    # year_f = 2004
     
     year_i = 1978
-    year_f = 2019
+    year_f = 2020
     
     #fechas
     inicio = pd.to_datetime(str(year_i)+'-12-31',format='%Y-%m-%d')
-    fin = pd.to_datetime(str(year_f)+'-12-31',format='%Y-%m-%d')
+    fin = pd.to_datetime(str(year_f)+'-03-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
 
     #minimo de años con datos
@@ -181,5 +181,5 @@ def main():
       
        
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    Q_daily_MLR.to_csv(r'C:\Users\ccalvo\Documents\GitHub\WEAP-MODFLOW-personal\Hydrology/Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_relleno.csv')
+    Q_daily_MLR.to_csv(ruta_GitHub+r'\WEAP-MODFLOW-personal\Hydrology/Q_relleno_MLR_Maipo_'+str(year_i+1)+'-'+str(year_f)+'_relleno.csv')
 
