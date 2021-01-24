@@ -121,7 +121,7 @@ def main():
     
     Q_daily_filtradas = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
     
-    fig, ax = plt.subplots(2,4)
+    fig, ax = plt.subplots(6,4)
     ax = ax.reshape(-1)
     for i, col in enumerate(Q_cr2_bueno.columns):
         Q_cr2_bueno[col].plot(ax = ax[i], legend = False, color = 'r', linewidth = 3)
@@ -207,7 +207,7 @@ def main():
     diff.index.names = ['']
     logplot = False
 
-    fig, ax1 = plt.subplots(2,4)
+    fig, ax1 = plt.subplots(6,4)
     ax1 = ax1.reshape(-1)
     for ind,col in enumerate(estaciones):
         Q_daily_MLR_sim = Q_daily_MLR[col].copy()
@@ -228,6 +228,6 @@ def main():
         plt.title('Estación '+col)
         ax1[ind].set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
-    plt.savefig(r'E:\CIREN\OneDrive - ciren.cl\Of hidrica\AOHIA_ZC\Etapa 1 y 2\Figuras\Mataquito_Residuales_ABHN_1990_2004.png',dpi=300)
-    Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Mataquito_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
+    plt.savefig(r'E:\CIREN\OneDrive - ciren.cl\Of hidrica\AOHIA_ZC\Etapa 1 y 2\Figuras\Maule_Residuales_ABHN_1990_2004.png',dpi=300)
+    Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Maule_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 
