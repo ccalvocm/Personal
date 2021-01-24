@@ -75,7 +75,7 @@ def main():
     # ruta_OD = r'C:\Users\ccalvo\OneDrive - ciren.cl'
     
 
-    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Mataquito\Q_Mataquito_1900-2020.csv'
+    ruta_Q = ruta_GitHub+r'\Analisis-Oferta-Hidrica\DGA\datosDGA\Q\Maule\Q_Maule_1900-2020_v0.csv'
 
     Q_daily = pd.read_csv(ruta_Q, index_col = 0)
     Q_daily.index = pd.to_datetime(Q_daily.index)
@@ -93,9 +93,14 @@ def main():
     fin = pd.to_datetime(str(year_f)+'-03-31',format='%Y-%m-%d')
     Q_daily = pd.DataFrame(Q_daily[Q_daily.index <= fin ],  index = pd.date_range(inicio, fin, freq='D', closed='right'))
     
+    #Estaciones que no son canales
+    
+    estaciones_nocanales = ['07340001-5','07335002-6','07308001-0','07381001-9','07375000-8','07378013-6','07378012-8','07341003-7','07354002-K','07354001-1','07356001-2','07355003-3','07355001-7','07355002-5','07350002-8','07331001-6','07339001-K','07336001-3','07306001-K','07372001-K','07379002-6','07320003-2','07379001-8','07307000-7','07379005-0','07374001-0','07357002-6','07359001-9','07350003-6','07350001-K','07351001-5','07308002-9','07321002-K','07322004-1','07300001-7','07383001-K','07322001-7','07303000-5','07317005-2','07317001-K','07317003-6','07332001-1','07335001-8','07330001-0','07335003-4','07341001-0','07343001-1','07358001-3']
+    
+    Q_daily = Q_daily[[x for x in Q_daily.columns if x in estaciones_nocanales]]
 
     #minimo de años con datos
-    minYr = 10*0.8
+    minYr = 20
 
   #%%Crear indice de fechas, convertir años a int y calcular frecuencia de datos
 
@@ -123,7 +128,7 @@ def main():
     
     Q_daily_filtradas = extenderQ(Q_daily_filtradas,Q_cr2_bueno)
     
-    fig, ax = plt.subplots(6,4)
+    fig, ax = plt.subplots(5,5)
     ax = ax.reshape(-1)
     for i, col in enumerate(Q_cr2_bueno.columns):
         Q_cr2_bueno[col].plot(ax = ax[i], legend = False, color = 'r', linewidth = 3)
@@ -148,7 +153,8 @@ def main():
     
     # estaciones = ['06003001-4', '06027001-5']
     estaciones = Q_daily_filtradas.columns
-    
+        
+    Q_daily_MLR = Q_daily_MLR[estaciones]
 
     # actualizacióin BHN
 #    estaciones = ['05722002-3','05748001-7']    
@@ -210,7 +216,7 @@ def main():
     diff.index.names = ['']
     logplot = False
     
-    fig, ax1 = plt.subplots(2,4)
+    fig, ax1 = plt.subplots(5,5)
     ax1 = ax1.reshape(-1)
     for ind,col in enumerate(estaciones):
         Q_daily_MLR_sim = Q_daily_MLR[col].copy()
@@ -231,5 +237,5 @@ def main():
         ax1[ind].set_ylim(bottom = 0)
     plt.legend(['Predictor','Original','Residual'],bbox_to_anchor=(1.05, 1), loc='upper left')    
     # plt.savefig(r'E:\CIREN\OneDrive - ciren.cl\Of hidrica\AOHIA_ZC\Etapa 1 y 2\Figuras\Rapel_Residuales_ABHN_1990_2004.png',dpi=300)
-    Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_relleno_MLR_Mataquito_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
+    Q_daily_MLR.to_csv(ruta_GitHub+'\Analisis-Oferta-Hidrica\Hidrología\Caudales\Validacion\Q_sin_canales_Q_relleno_MLR_Maule_'+str(year_i+1)+'-'+str(year_f)+'_outlier_in_correction_median.csv')
 
