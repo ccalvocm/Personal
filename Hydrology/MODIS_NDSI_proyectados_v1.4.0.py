@@ -45,9 +45,7 @@ def hdf_subdataset_extraction(file_name, dst_dir):
     out_ds.GetRasterBand(1).WriteArray(band_array)
     out_ds.GetRasterBand(1).SetNoDataValue(-32768)
     out_ds = None  #Cerrar y guardar
-
-    # shp_clip_completo = r'C:\Users\Carlos\Documents\QGIS\Salar\WEAP_Salar_de_Atacama\layers\Cuenca_Salar_de_Atacama_DARH.shp'
-    
+   
     shp_clip = 'C:\\Users\\Carlos\\Documents\\Python Scripts\\Mask.shp'
 
     band_path_2 = os.path.join(dst_dir, os.path.basename(os.path.splitext(file_name)[0]) + "-sd" + str(3+1) + "_WGS84.tif")
