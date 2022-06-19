@@ -118,6 +118,7 @@ def main():
     plt.ylabel('dY')
     ax = hf.gca(projection='3d')
     ax.set_zlabel('Elevación (m)')
+    ax.set_title('Top Layer 1')
     
     # obtener los stress periods y crear paquete well
     spd = {i: [[0, 30, 30, -150.],] for i in range(ml.nper)}
