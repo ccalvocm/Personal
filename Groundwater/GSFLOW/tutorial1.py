@@ -114,6 +114,10 @@ def main():
     X, Y = np.meshgrid(np.arange(0,dis.ncol), np.arange(0,dis.nrow))  # `plot_surface` expects `x` and `y` data to be 2D
     ha.plot_surface(X[:,1:], Y[:,1:], top[:,1:])
     plt.show()
+    plt.xlabel('dX')
+    plt.ylabel('dY')
+    ax = hf.gca(projection='3d')
+    ax.set_zlabel('Elevación (m)')
     
     # obtener los stress periods y crear paquete well
     spd = {i: [[0, 30, 30, -150.],] for i in range(ml.nper)}
